@@ -361,6 +361,8 @@ def procesar_archivos(input_path: str, output_path: str, n: int = 0) -> dict:
             else:
                 # Procesar múltiples archivos y combinarlos en un único JSON
                 json_final = {}
+                total_archivos = len(txt_files)
+                contador = 0
                 for filename in txt_files:
                     file_path = os.path.join(input_path, filename)
                     try:
@@ -371,8 +373,14 @@ def procesar_archivos(input_path: str, output_path: str, n: int = 0) -> dict:
                         errores.append(filename)
                         resultados[filename] = f"Error: {str(e)}"
                         logging.exception(f"Error procesando el archivo {filename}")
+                    contador += 1
+                    if contador % 100 == 0:
+                        print(f"Procesados {contador} de {total_archivos} ficheros...")
                 full_output_path = os.path.join(output_path, "medicamentos.json")
                 guardar_json(json_final, full_output_path)
+                # Mensaje final si no es múltiplo de 100
+                if total_archivos % 100 != 0 or total_archivos == 0:
+                    print(f"Procesados todos los {total_archivos} ficheros.")
         else:
             raise ValueError("La ruta no es válida")
 
@@ -390,13 +398,17 @@ def procesar_archivos(input_path: str, output_path: str, n: int = 0) -> dict:
 if __name__ == "__main__":
     # Rutas definidas en el script
     input_path = os.path.join("..", "..", "data", "inputs", "2_data_preprocessing", "wrangler")
-    output_path = os.path.join("..", "..", "data", "outputs", "2_data_preprocessing", "wrangler")
+    output_path = os.path.join("..", "..", "data", "outputs", "2_data_preprocessing")
 
     # Solicitar al usuario el número de archivos a procesar
     try:
-        n = int(input("Introduce el número de archivos TXT a procesar: "))
+        entrada = input("Introduce el número de archivos TXT a procesar (o escribe 'todos' para procesar todos): ")
+        if entrada.lower() == "todos":
+            n = 0  # 0 indica que se procesarán todos los archivos
+        else:
+            n = int(entrada)
     except ValueError:
-        logging.error("El valor introducido no es un número entero.")
+        logging.error("El valor introducido no es un número entero ni la palabra 'todos'.")
         exit(1)
 
     # Llamada a la función de procesamiento
