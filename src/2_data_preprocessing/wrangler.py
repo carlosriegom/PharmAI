@@ -26,7 +26,6 @@ def guardar_json(data: dict, output_path: str) -> None:
         logging.exception("Error guardando JSON")
         raise RuntimeError(f"Error guardando JSON: {str(e)}") from e
 
-
 # Función para limpiar el diccionario
 def limpiar_diccionario(data: dict) -> dict:
     """
@@ -41,15 +40,44 @@ def limpiar_diccionario(data: dict) -> dict:
     # 1. Limpieza específica de fecha_revision
     def limpiar_fecha_revision(data: dict) -> dict:
         if "fecha_revision" in data and data["fecha_revision"]:
-            patron = re.compile(
-                r"(\s*la información detallada y actualizada de este medicamento está disponible en la página web de la\s*"
-                r"agencia española de medicamentos y productos sanitarios \(aemps\) http://www\.aemps\.gob\.es/\s*)",
-                re.IGNORECASE | re.DOTALL,
-            )
-            data["fecha_revision"] = patron.sub(" ", data["fecha_revision"]).strip()
+            texto = data["fecha_revision"].strip()  # Limpiamos espacios en blanco
+            # Primer intento: buscar la subcadena exacta "la información detallada"
+            indice = texto.lower().find("la información detallada")
+            if indice != -1:
+                texto = texto[:indice].strip()
+            else:
+                # Si no se encuentra, usamos una expresión regular flexible
+                patron = re.compile(r"(?i)\s*la\s+informaci[oó]n\s+detallada.*$", re.IGNORECASE)
+                texto = patron.sub("", texto).strip()
+            
+            # Nueva funcionalidad: conversión de "MM/YYYY" → "mes año"
+            match = re.fullmatch(r"(\d{1,2})/(\d{4})", texto)
+            if match:
+                mes_num, anio = match.groups()
+                meses = {
+                    "1": "enero", "01": "enero",
+                    "2": "febrero", "02": "febrero",
+                    "3": "marzo", "03": "marzo",
+                    "4": "abril", "04": "abril",
+                    "5": "mayo", "05": "mayo",
+                    "6": "junio", "06": "junio",
+                    "7": "julio", "07": "julio",
+                    "8": "agosto", "08": "agosto",
+                    "9": "septiembre", "09": "septiembre",
+                    "10": "octubre",
+                    "11": "noviembre",
+                    "12": "diciembre",
+                }
+                mes = meses.get(mes_num, mes_num)
+                texto = f"{mes} {anio}"
+            
+            data["fecha_revision"] = texto
         return data
 
     data = limpiar_fecha_revision(data)
+
+
+
 
     # Función para convertir texto a minúsculas
     def convertir_a_minusculas(texto: str) -> str:
@@ -88,18 +116,6 @@ def limpiar_diccionario(data: dict) -> dict:
         texto = re.sub(r"[^\x00-\x7F\u00A0-\u00FF\u0100-\u017F]", " ", texto)
         return re.sub(r"\s+", " ", texto).strip()
 
-    # Función para limpiar posología
-    def limpiar_posologia(data: dict) -> dict:
-        if "posologia" in data and data["posologia"]:
-            patron = re.compile(
-                r"(posolog[ií]a|forma\s+de\s+administraci[oó]n)\s*:\s*",
-                flags=re.IGNORECASE,
-            )
-            texto_limpio = patron.sub("", data["posologia"])
-            texto_limpio = re.sub(r"\s+", " ", texto_limpio).strip()
-            data["posologia"] = texto_limpio
-        return data
-
     # Función para limpiar referencias a secciones
     def limpiar_referencias_secciones(texto: str) -> str:
         if not texto:
@@ -134,8 +150,6 @@ def limpiar_diccionario(data: dict) -> dict:
             contenido = limpiar_numeraciones(contenido)
             contenido = limpiar_referencias_secciones(contenido)
 
-            if seccion == "posologia":
-                contenido = limpiar_posologia({seccion: contenido})[seccion]
             if seccion == "reacciones_adversas":
                 contenido = limpiar_reacciones_adversas(contenido)
 
@@ -143,7 +157,6 @@ def limpiar_diccionario(data: dict) -> dict:
             data[seccion] = contenido
 
     return data
-
 
 # Función para extraer las secciones relevantes de un archivo TXT, exportar a JSON y guardar
 def extract_secciones(file_path: str) -> dict:
@@ -186,6 +199,7 @@ def extract_secciones(file_path: str) -> dict:
         "ignore_until_10": False,
     }
 
+    # Bucle principal para procesar las líneas del archivo
     for line in lines:
         line = line.strip()
 
@@ -200,44 +214,35 @@ def extract_secciones(file_path: str) -> dict:
 
         # ===== LÓGICA PARA EXCIPIENTES (6.1 a 6.2) =====
         if control_flags["in_excipientes"]:
-            if re.match(
-                r"^6\s*\.?\s*2\s*\.?\s*Incompatibilidades", line, re.IGNORECASE
-            ):
+            if re.match(r"^6\s*\.?\s*2\s*\.?\s*Incompatibilidades", line, re.IGNORECASE):
                 control_flags["in_excipientes"] = False
+                control_flags["in_incompatibilidades"] = True
             else:
                 if line and not re.match(r"^6\.1", line):
                     data["excipientes"].append(line)
             continue
 
         # ===== LÓGICA PARA INCOMPATIBILIDADES (6.2 a 6.3) =====
-        if control_flags["in_incompatibilidades"]:
-            if re.match(
-                r"^6\s*\.?\s*3\s*\.?\s*Periodo\s+de\s+validez", line, re.IGNORECASE
-            ):
-                control_flags["in_incompatibilidades"] = False
+        if control_flags['in_incompatibilidades']:
+            if re.match(r'^6\s*\.?\s*3\s*\.?\s*Periodo\s+de\s+validez', line, re.IGNORECASE):
+                control_flags['in_incompatibilidades'] = False
             else:
-                if line and not re.match(r"^6\.2", line):
-                    data["incompatibilidades"].append(line)
+                if line and not line.startswith("6.2"):
+                    data['incompatibilidades'].append(line)
             continue
 
         # ===== LÓGICA PARA PRECAUCIONES (6.4 a 6.5) =====
-        if control_flags["in_precauciones"]:
-            if re.match(
-                r"^6\s*\.?\s*5\s*\.?\s*NATURALEZA\s+Y\s+CONTENIDO\s+DEL\s+ENVASE",
-                line,
-                re.IGNORECASE,
-            ):
-                control_flags["in_precauciones"] = False
+        if control_flags['in_precauciones']:
+            if re.match(r'^6\s*\.?\s*5\s*\.?\s*NATURALEZA\s+Y\s+CONTENIDO\s+DEL\s+ENVASE', line, re.IGNORECASE):
+                control_flags['in_precauciones'] = False
             else:
-                if line and not re.match(r"^6\.4", line):
-                    data["precauciones_conservacion"].append(line)
+                if line and not line.startswith("6.4"):
+                    data['precauciones_conservacion'].append(line)
             continue
 
         # ===== LÓGICA PARA SOBREDOSIS (4.9 a 5. PROPIEDADES) =====
         if control_flags["in_sobredosis"]:
-            if re.match(
-                r"^5\s*\.?\s*PROPIEDADES\s+FARMACOLÓGICAS", line, re.IGNORECASE
-            ):
+            if re.match(r"^5\s*\.?\s*PROPIEDADES\s+FARMACOLÓGICAS", line, re.IGNORECASE):
                 control_flags["in_sobredosis"] = False
             else:
                 if line and not re.match(r"^4\.9", line):
@@ -277,29 +282,42 @@ def extract_secciones(file_path: str) -> dict:
 
         # ===== CAPTURA DEL CÓDIGO ATC =====
         if control_flags["capture_atc"]:
-            if "ATC:" in line:
-                if match := re.search(r"ATC:\s*([A-Z0-9]{4,7})\b", line):
-                    data["ATC"] = [match.group(1)]
+            # Primer intento: buscar el código en la misma línea que "ATC" (con o sin ':')
+            match = re.search(r"(?i)ATC:?\s*([A-Z0-9]{4,7})\b", line)
+            if match:
+                data["ATC"] = [match.group(1)]
                 control_flags["capture_atc"] = False
+                continue
+            # Si no se encontró y la línea no está vacía, evaluar si la línea es únicamente el código
+            if line:
+                match = re.match(r"^([A-Z0-9]{4,7})$", line)
+                if match:
+                    data["ATC"] = [match.group(1)]
+                    control_flags["capture_atc"] = False
+                    continue
             continue
+
 
         # ===== CAPTURA NORMAL DE CONTENIDO =====
         if current_section and not any(control_flags.values()):
             data[current_section].append(line)
 
-    # Post-procesamiento
+    # Post-procesamiento: convertir listas a strings y eliminar campos vacíos
     for key in data:
         if isinstance(data[key], list):
             data[key] = "\n".join(data[key]).strip()
-            if not data[key]:  # Eliminar campos vacíos
+            if not data[key]:
                 data[key] = None
 
     return limpiar_diccionario(data)
 
-
 # Función principal para procesar archivos
-def procesar_archivos(input_path: str, output_path: str) -> dict:
-    """Procesa un archivo o carpeta y genera los JSON correspondientes."""
+def procesar_archivos(input_path: str, output_path: str, n: int = 0) -> dict:
+    """Procesa uno o varios archivos TXT y genera los JSON correspondientes.
+       Si se procesa un solo archivo, se guarda con el mismo nombre.
+       Si se procesan varios archivos, se combinan en un único JSON llamado 'medicamentos.json'.
+       El parámetro n indica cuántos archivos de la carpeta se deben procesar (0 para todos).
+    """
     resultados = {}
     total_procesados = 0
     errores = []
@@ -311,17 +329,41 @@ def procesar_archivos(input_path: str, output_path: str) -> dict:
         if os.path.isfile(input_path):
             if input_path.lower().endswith(".txt"):
                 data = extract_secciones(input_path)
-                guardar_json(data, output_path)
-                logging.info(f"Json guardado en: {output_path}")
+                nombre_output = os.path.basename(input_path).replace(".txt", ".json")
+                full_output_path = os.path.join(output_path, nombre_output)
+                guardar_json(data, full_output_path)
                 total_procesados += 1
                 resultados[os.path.basename(input_path)] = "OK"
             else:
                 raise ValueError("El archivo no es un TXT")
 
         elif os.path.isdir(input_path):
-            json_final = {}
-            for filename in os.listdir(input_path):
-                if filename.lower().endswith(".txt"):
+            txt_files = sorted([f for f in os.listdir(input_path) if f.lower().endswith(".txt")])
+            # Si n es mayor que 0, procesamos los n primeros; si n es 0, procesamos todos.
+            if n > 0:
+                txt_files = txt_files[:n]
+
+            if len(txt_files) == 1:
+                # Procesar un solo archivo y guardarlo con su nombre
+                file_name = txt_files[0]
+                file_path = os.path.join(input_path, file_name)
+                try:
+                    data = extract_secciones(file_path)
+                    full_output_path = os.path.join(output_path, file_name.replace(".txt", ".json"))
+                    guardar_json(data, full_output_path)
+                    total_procesados += 1
+                    resultados[file_name] = "OK"
+                except Exception as e:
+                    errores.append(file_name)
+                    resultados[file_name] = f"Error: {str(e)}"
+                    logging.exception(f"Error procesando el archivo {file_name}")
+
+            else:
+                # Procesar múltiples archivos y combinarlos en un único JSON
+                json_final = {}
+                total_archivos = len(txt_files)
+                contador = 0
+                for filename in txt_files:
                     file_path = os.path.join(input_path, filename)
                     try:
                         data = extract_secciones(file_path)
@@ -331,7 +373,14 @@ def procesar_archivos(input_path: str, output_path: str) -> dict:
                         errores.append(filename)
                         resultados[filename] = f"Error: {str(e)}"
                         logging.exception(f"Error procesando el archivo {filename}")
-            guardar_json(json_final, output_path)
+                    contador += 1
+                    if contador % 100 == 0:
+                        print(f"Procesados {contador} de {total_archivos} ficheros...")
+                full_output_path = os.path.join(output_path, "medicamentos.json")
+                guardar_json(json_final, full_output_path)
+                # Mensaje final si no es múltiplo de 100
+                if total_archivos % 100 != 0 or total_archivos == 0:
+                    print(f"Procesados todos los {total_archivos} ficheros.")
         else:
             raise ValueError("La ruta no es válida")
 
@@ -345,33 +394,25 @@ def procesar_archivos(input_path: str, output_path: str) -> dict:
 
     return resultados
 
-
-# Ejecución
+# Ejecución principal
 if __name__ == "__main__":
-    # Configuración manual de rutas
-    # input_path = os.path.join("..", "..", "data", "inputs", "1_data_acquisition", "wrangler", # "A.A.S._100_mg_COMPRIMIDOS.txt")
-    input_path = os.path.join("..", "..", "data", "inputs")
+    # Rutas definidas en el script
+    input_path = os.path.join("..", "..", "data", "inputs", "2_data_preprocessing", "wrangler")
+    output_path = os.path.join("..", "..", "data", "outputs", "2_data_preprocessing")
 
-    if os.path.isfile(input_path):
-        nombre_output = os.path.basename(input_path).replace(".txt", "")
-    else:
-        nombre_output = "medicamentos.json"
-
-    output_path = os.path.join(
-        "..",
-        "..",
-        "data",
-        "outputs",
-        "2_data_preprocessing",
-        "wrangler",
-        nombre_output,
-    )
-
-    # Procesar archivos
+    # Solicitar al usuario el número de archivos a procesar
     try:
-        logging.info(f"Iniciando procesamiento de: {input_path}")
-        resultados = procesar_archivos(input_path, output_path)
-        logging.info("Ejecución completada")
+        entrada = input("Introduce el número de archivos TXT a procesar (o escribe 'todos' para procesar todos): ")
+        if entrada.lower() == "todos":
+            n = 0  # 0 indica que se procesarán todos los archivos
+        else:
+            n = int(entrada)
+    except ValueError:
+        logging.error("El valor introducido no es un número entero ni la palabra 'todos'.")
+        exit(1)
+
+    # Llamada a la función de procesamiento
+    try:
+        procesar_archivos(input_path, output_path, n)
     except Exception as e:
         logging.error(f"ERROR: Fallo en el procesamiento - {str(e)}")
-        raise
