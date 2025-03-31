@@ -308,6 +308,7 @@ manifestó
 mayor
 me
 mediante
+medicamento
 mejor
 mencionó
 menos
@@ -360,6 +361,7 @@ otra
 otras
 otro
 otros
+paciente
 para
 parece
 parte
@@ -533,6 +535,7 @@ trabajas
 trabajo
 tras
 trata
+tratamiento
 través
 tres
 tu
