@@ -21,7 +21,7 @@ def load_json_dict(file_path):
     
     # Carga el archivo JSON
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             data = json.load(file)
             
             # Si data no es un diccionario, lanza un error
@@ -55,8 +55,8 @@ def save_dict_to_json(dictionary, filename):
     
     try:
         # Guarda el diccionario en un archivo JSON
-        with open(filename, 'w') as f:
-            json.dump(dictionary, f, indent=4)
+        with open(filename, 'w', encoding='utf-8') as f:
+            json.dump(dictionary, f, indent=4, ensure_ascii=False)
     except TypeError as e:
         raise ValueError(f"Error al serializar el diccionario a JSON: {e}")
     except IOError as e:
