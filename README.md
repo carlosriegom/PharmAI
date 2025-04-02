@@ -2,14 +2,22 @@
 
 ### Tabla de contenidos
 
-1. **Descripción del proyecto**
-2. **Requisitos**
-3. **Estructura del proyecto** <br>
-   3.1 **Adquisición de los datos** <br>
-   3.2 **Preprocesamiento de datos** <br>
-   3.3 **Análisis exploratorio de datos (EDA)** <br>
-   3.4 **Machine Learning** <br>
-   3.5 **Chatbot** <br>
+1. **Requisitos**
+2. **Estructura del proyecto** <br>
+   2.1 **Adquisición de los datos** <br>
+   2.2 **Preprocesamiento de datos** <br>
+   2.3 **Análisis exploratorio de datos (EDA)** <br>
+   2.4 **Machine Learning** <br>
+   2.5 **Chatbot** <br>
+
+
+## 1. Requisitos
+
+
+
+
+
+
 
 4. **Data Acquisition**
    - Sacar Lista de Principios activos (+2K).
