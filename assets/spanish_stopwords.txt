@@ -681,3 +681,7 @@ régimen
 regimen
 regímenes
 regimenes
+día
+días
+dia
+dias
