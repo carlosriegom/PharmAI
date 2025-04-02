@@ -433,7 +433,7 @@ if __name__ == "__main__":
     # Ruta donde guarda los outputs (ficheros .json) del proceso ETL
     # El output será el archivo 'medicamentos.json', conteniendo todos los ficheros procesados y estructurados
     output_path = os.path.join(
-        "..", "..", "data", "outputs", "2_data_preprocessing", "wrangler"
+        "..", "..", "data", "outputs", "1_data_acquisition", "wrangler"
     )
 
     # Solicitar al usuario el número de archivos a procesar
