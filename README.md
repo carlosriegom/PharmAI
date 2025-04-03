@@ -46,14 +46,14 @@ Para la adquisición de los datos, se ha utilizado un scraper que obtiene la inf
 
 2. **Fetcher ⬇️​**
 
-   En esta parte lo que hacemos es leer el fichero `medicamentos.csv` y para cada medicamento, descargamos la ficha técnica en PDF y estos se guardan en la carpeta `data/outputs/1_data_acquisition/fetcher` con el siguiente formato: `Nombre_Medicamento.pdf`.  Para ejectutar el spider, se utiliza el siguiente comando:
+En esta parte lo que hacemos es leer el fichero `medicamentos.csv` y para cada medicamento, descargamos la ficha técnica en PDF y estos se guardan en la carpeta `data/outputs/1_data_acquisition/fetcher` con el siguiente formato: `Nombre_Medicamento.pdf`.  Para ejectutar el spider, se utiliza el siguiente comando:
 
-   ```bash
-   python blablabla.py
-   ```
+```bash
+python blablabla.py
+```
 
-   > [!NOTE] 
-   > Para ver el contenido que aparece en una ficha técnica haz click [aquí](https://cima.aemps.es/cima/pdfs/ft/99122002/FT_99122002.pdf).
+> [!NOTE] 
+> Para ver el contenido que aparece en una ficha técnica haz click [aquí](https://cima.aemps.es/cima/pdfs/ft/99122002/FT_99122002.pdf).
 
 3. **Crawler ⛏️**
 
@@ -184,8 +184,3 @@ Por último, una vez conseguida esta información, la unimos al `medicamentos.js
    <img src="data\outputs\3_eda\wordclouds\varios.png" alt="Imagen para varios">
 </details>
 
-
-
-<div style="border: 1px solid #f1c40f; background-color: #fff3cd; padding: 10px;">
-  <strong>NOTE:</strong> Para ver el contenido que aparece en una ficha técnica, haz click <a href="#">aquí</a>.
-</div>
