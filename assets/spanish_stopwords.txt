@@ -685,3 +685,4 @@ día
 días
 dia
 dias
+aumento
