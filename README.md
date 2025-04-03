@@ -6,7 +6,7 @@
   - [**1. Requisitos**](#1-requisitos)
   - [**2. Estructura del proyecto**](#2-estructura-del-proyecto)
     - [**2.1 Adquisición de los datos**](#21-adquisición-de-los-datos)
-    - [2.2 Preprocesamiento de datos](#22-preprocesamiento-de-datos)
+    - [**2.2 Preprocesamiento de datos**](#22-preprocesamiento-de-datos)
     - [**2.3 Análisis exploratorio de datos (EDA)**](#23-análisis-exploratorio-de-datos-eda)
 
 
@@ -95,7 +95,7 @@ Para la adquisición de los datos, se ha utilizado un scraper que obtiene la inf
    >      }, ...
    >   ```
 
-### 2.2 Preprocesamiento de datos
+### **2.2 Preprocesamiento de datos**
 Como hemos visto en la sección anterior, para cada uno de los medicamentos obtenemos una sección llamada _ATC_ que contiene el código _ATC_ del medicamento. Los códigos _ATC_ (_Anatomical Therapeutic Chemical_) son un sistema de clasificación para medicamentos que agrupa fármacos según el órgano o sistema sobre el que actúan, así como sus propiedades terapéuticas, farmacológicas y químicas. Se utilizan para estandarizar la clasificación de los medicamentos a nivel internacional, facilitando la investigación, el análisis de tendencias de prescripción y la farmacovigilancia.
 
 Por ello nos parece importante tener también esta información en el _json_ de salida. Investigando un poco encontramos un repositorio con el cual podemos obtener todos los distintos niveles del código _ATC_ y su descripción ([repositorio de códigos ATC](https://github.com/sarrabenyahia/webscrap_health_monitoring.git)). En este econtramos un fichero _csv_ que contiene la información de los códigos _ATC_ y su descripción. Este fichero lo vamos a guardar en la ruta `data/inputs/2_data_preprocessing/Tabla_ATC.csv`.
