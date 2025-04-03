@@ -119,16 +119,73 @@ Por último, una vez conseguida esta información, la unimos al `medicamentos.js
 ### **2.3 Análisis exploratorio de datos (EDA)**
 
 
+<details>
+  <summary>Antiinfecciosos para uso sistémico</summary>
+  <img src="data\outputs\3_eda\wordclouds\antiinfecciosos_para_uso_sistémico.png" alt="Imagen para antiinfecciosos_para_uso_sistémico">
+</details>
 
-1. **Data Preprocessing**
-   - Read the technical data sheet and extract JSON with medication fields (prompt 1)
+<details>
+  <summary>Antineoplásicos e inmunomoduladores</summary>
+  <img src="data\outputs\3_eda\wordclouds\antineoplásicos_e_inmunomoduladores.png" alt="Imagen para antineoplásicos_e_inmunomoduladores">
+</details>
 
-2. **Exploratory Data Analysis (EDA)**
-   - Basic analysis
-   - Clustering
+<details>
+  <summary>Dermatológicos</summary>
+  <img src="data\outputs\3_eda\wordclouds\dermatológicos.png" alt="Imagen para dermatológicos"> 
+</details>
 
-3. **Contraindications Detection**
-   - Provide the medication to the model and have it explain contraindications
+<details>
+  <summary>Órganos sensoriales</summary>
+   <img src="data\outputs\3_eda\wordclouds\órganos_sensoriales.png" alt="Imagen para órganos_sensoriales">
+</details>
 
-4.  **Alternative Suggestions**
-   - Provide the medication and medication history, and the model offers alternative medications without contraindications
+<details>
+  <summary>Preparados hormonales sistémicos excluyendo hormonas sexuales e insulinas</summary>
+   <img src="data\outputs\3_eda\wordclouds\preparados_hormonales_sistémicos__excluyendo_hormonas_sexuales_e_insulinas.png" alt="Imagen para preparados_hormonales_sistémicos_excluyendo_hormonas_sexuales_e_insulinas">
+</details>
+
+<details>
+  <summary>Productos antiparasitarios, insecticidas y repelentes</summary>
+   <img src="data\outputs\3_eda\wordclouds\productos_antiparasitarios__insecticidas_y_repelentes.png" alt="Imagen para productos_antiparasitarios_insecticidas_y_repelentes">
+</details>
+
+<details>
+  <summary>Sangre y órganos hematopoyéticos</summary>
+   <img src="data\outputs\3_eda\wordclouds\sangre_y_órganos_hematopoyéticos.png" alt="Imagen para sangre_y_órganos_hematopoyéticos">
+</details>
+
+<details>
+  <summary>Sistema cardiovascular</summary>
+   <img src="data\outputs\3_eda\wordclouds\sistema_cardiovascular.png" alt="Imagen para sistema_cardiovascular">
+</details>
+
+<details>
+  <summary>Sistema digestivo y metabolismo</summary>
+   <img src="data\outputs\3_eda\wordclouds\sistema_digestivo_y_metabolismo.png" alt="Imagen para sistema_digestivo_y_metabolismo">
+</details>
+
+<details>
+  <summary>Sistema genitourinario y hormonas sexuales</summary>
+   <img src="data\outputs\3_eda\wordclouds\sistema_genitourinario_y_hormonas_sexuales.png" alt="Imagen para sistema_genitourinario_y_hormonas_sexuales">
+</details>
+
+<details>
+  <summary>Sistema musculoesquelético</summary>
+   <img src="data\outputs\3_eda\wordclouds\sistema_musculoesquelético.png" alt="Imagen para sistema_musculoesquelético">
+</details>
+
+<details>
+  <summary>Sistema nervioso</summary>
+   <img src="data\outputs\3_eda\wordclouds\sistema_nervioso.png" alt="Imagen para sistema_nervioso">
+</details>  
+
+<details>
+  <summary>Varios</summary>
+   <img src="data\outputs\3_eda\wordclouds\varios.png" alt="Imagen para varios">
+</details>
+
+
+
+<div style="border: 1px solid #f1c40f; background-color: #fff3cd; padding: 10px;">
+  <strong>NOTE:</strong> Para ver el contenido que aparece en una ficha técnica, haz click <a href="#">aquí</a>.
+</div>
