@@ -1,13 +1,12 @@
 # **PharmAI**
 
 ### **Tabla de contenidos**
-- [**PharmAI**](#pharmai)
-    - [**Tabla de contenidos**](#tabla-de-contenidos)
-  - [**1. Requisitos**](#1-requisitos)
-  - [**2. Estructura del proyecto**](#2-estructura-del-proyecto)
-    - [**2.1 Adquisición de los datos**](#21-adquisición-de-los-datos)
-    - [**2.2 Preprocesamiento de datos**](#22-preprocesamiento-de-datos)
-    - [**2.3 Análisis exploratorio de datos (EDA)**](#23-análisis-exploratorio-de-datos-eda)
+
+- [**1. Requisitos**](#1-requisitos) <br>
+- [**2. Estructura del proyecto**](#2-estructura-del-proyecto) <br>
+   - [**2.1 Adquisición de los datos**](#21-adquisición-de-los-datos)
+   - [**2.2 Preprocesamiento de datos**](#22-preprocesamiento-de-datos)
+   - [**2.3 Análisis exploratorio de datos (EDA)**](#23-análisis-exploratorio-de-datos-eda)
 
 
 ## **1. Requisitos**
