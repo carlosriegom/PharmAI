@@ -61,3 +61,36 @@ def save_dict_to_json(dictionary, filename):
         raise ValueError(f"Error al serializar el diccionario a JSON: {e}")
     except IOError as e:
         raise IOError(f"Error al escribir el archivo JSON: {e}")
+    
+
+# Función para cargar un json como lista de diccionarios
+def load_json(file_path):
+    """
+    Carga un archivo JSON y lo convierte en una lista de diccionarios.
+
+    Args:
+        file_path (str): Ruta del archivo JSON a cargar.
+
+    Returns:
+        list: Lista de diccionarios con los datos del archivo JSON.
+    """
+    # Verifica si el archivo existe
+    if not os.path.isfile(file_path):
+        raise FileNotFoundError(f"El archivo {file_path} no existe.")
+    
+    # Carga el archivo JSON
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+            
+            # Si data no es una lista, lanza un error
+            if not isinstance(data, list):
+                raise ValueError("El JSON cargado no es una lista.")
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Error al cargar el archivo JSON: {e}")
+    
+    # Verifica si la lista está vacía
+    if not data:
+        raise ValueError("El archivo JSON está vacío.")
+    
+    return data
