@@ -2,21 +2,11 @@
 
 ### **Tabla de contenidos**
 
-<<<<<<< HEAD
 - [**1. Requisitos**](#1-requisitos) <br>
 - [**2. Estructura del proyecto**](#2-estructura-del-proyecto) <br>
    - [**2.1 Adquisición de los datos**](#21-adquisición-de-los-datos)
    - [**2.2 Preprocesamiento de datos**](#22-preprocesamiento-de-datos)
    - [**2.3 Análisis exploratorio de datos (EDA)**](#23-análisis-exploratorio-de-datos-eda)
-=======
-- [**PharmAI**](#pharmai)
-  - [**Tabla de contenidos**](#tabla-de-contenidos)
-  - [**1. Requisitos**](#1-requisitos)
-  - [**2. Estructura del proyecto**](#2-estructura-del-proyecto)
-    - [**2.1 Adquisición de los datos**](#21-adquisición-de-los-datos)
-    - [2.2 Preprocesamiento de datos](#22-preprocesamiento-de-datos)
-    - [**2.3 Análisis exploratorio de datos (EDA)**](#23-análisis-exploratorio-de-datos-eda)
->>>>>>> 6ecbf1cd (Chatbot)
 
 ## **1. Requisitos**
 
@@ -57,23 +47,16 @@ Este fichero csv se llama `medicamentos.csv`, guardado en la carpeta `data/outpu
 
 #### **2. Fetcher ⬇️​**
 
-<<<<<<< HEAD
 En esta parte lo que hacemos es leer el fichero `medicamentos.csv` y para cada medicamento, descargamos la ficha técnica en PDF y estos se guardan en la carpeta `data/outputs/1_data_acquisition/fetcher` con el siguiente formato: `Nombre_Medicamento.pdf`.  Para ejectutar el spider, se utiliza el siguiente comando:
-=======
-   En esta parte lo que hacemos es leer el fichero `medicamentos.csv` y para cada medicamento, descargamos la ficha técnica en PDF y estos se guardan en la carpeta `data/outputs/1_data_acquisition/fetcher` con el siguiente formato: `Nombre_Medicamento.pdf`. Para ejectutar el spider, se utiliza el siguiente comando:
->>>>>>> 6ecbf1cd (Chatbot)
 
 ```bash
 python blablabla.py
 ```
 
-<<<<<<< HEAD
 > [!NOTE] 
 > Para ver el contenido que aparece en una ficha técnica haz click [aquí](https://cima.aemps.es/cima/pdfs/ft/99122002/FT_99122002.pdf).
-=======
-   > [!NOTE]
-   > Para ver el contenido que aparece en una ficha técnica haz click [aquí](https://cima.aemps.es/cima/pdfs/ft/99122002/FT_99122002.pdf).
->>>>>>> 6ecbf1cd (Chatbot)
+
+<br>
 
 #### **3. Crawler ⛏️**
 
@@ -83,6 +66,7 @@ En esta parte extraemos la información de cada uno de los PDFs descargados en l
 python blablabla.py
 ```
 
+<br>
 
 #### **4. Wrangler 📄**
 
@@ -118,10 +102,6 @@ python blablabla.py
 <br>
 
 ### **2.2 Preprocesamiento de datos**
-=======
-### 2.2 Preprocesamiento de datos
-
->>>>>>> 6ecbf1cd (Chatbot)
 Como hemos visto en la sección anterior, para cada uno de los medicamentos obtenemos una sección llamada _ATC_ que contiene el código _ATC_ del medicamento. Los códigos _ATC_ (_Anatomical Therapeutic Chemical_) son un sistema de clasificación para medicamentos que agrupa fármacos según el órgano o sistema sobre el que actúan, así como sus propiedades terapéuticas, farmacológicas y químicas. Se utilizan para estandarizar la clasificación de los medicamentos a nivel internacional, facilitando la investigación, el análisis de tendencias de prescripción y la farmacovigilancia.
 
 Por ello nos parece importante tener también esta información en el _json_ de salida. Investigando un poco encontramos un repositorio con el cual podemos obtener todos los distintos niveles del código _ATC_ y su descripción ([repositorio de códigos ATC](https://github.com/sarrabenyahia/webscrap_health_monitoring.git)). En este econtramos un fichero _csv_ que contiene la información de los códigos _ATC_ y su descripción. Este fichero lo vamos a guardar en la ruta `data/inputs/2_data_preprocessing/Tabla_ATC.csv`.
@@ -235,4 +215,4 @@ A continuación se muestran algunos wordclouds obtenidos para los distintos grup
 
 #### **Correlación entre las longitudes de los textos por sección**
 
-![Correlación entre las longitudes de los textos por sección](images/correlacion_longitudes_textos.png)
+![Correlación entre las longitudes de los textos por sección](images/correlacion_longitudes_texto.png)
