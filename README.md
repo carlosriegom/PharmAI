@@ -2,19 +2,30 @@
 
 ### **Tabla de contenidos**
 
+<<<<<<< HEAD
 - [**1. Requisitos**](#1-requisitos) <br>
 - [**2. Estructura del proyecto**](#2-estructura-del-proyecto) <br>
    - [**2.1 Adquisición de los datos**](#21-adquisición-de-los-datos)
    - [**2.2 Preprocesamiento de datos**](#22-preprocesamiento-de-datos)
    - [**2.3 Análisis exploratorio de datos (EDA)**](#23-análisis-exploratorio-de-datos-eda)
-
+=======
+- [**PharmAI**](#pharmai)
+  - [**Tabla de contenidos**](#tabla-de-contenidos)
+  - [**1. Requisitos**](#1-requisitos)
+  - [**2. Estructura del proyecto**](#2-estructura-del-proyecto)
+    - [**2.1 Adquisición de los datos**](#21-adquisición-de-los-datos)
+    - [2.2 Preprocesamiento de datos](#22-preprocesamiento-de-datos)
+    - [**2.3 Análisis exploratorio de datos (EDA)**](#23-análisis-exploratorio-de-datos-eda)
+>>>>>>> 6ecbf1cd (Chatbot)
 
 ## **1. Requisitos**
+
 Para poder ejecutar el proyecto, es necesario tener instalado Python 3.11.11 o superior y las siguientes librerías:
 
 ```bash
 pip install -r requirements.txt
 ```
+
 Con esto, ya tenremos todas las dependencias necesarias para ejecutar el proyecto.
 
 ## **2. Estructura del proyecto**
@@ -46,14 +57,23 @@ Este fichero csv se llama `medicamentos.csv`, guardado en la carpeta `data/outpu
 
 #### **2. Fetcher ⬇️​**
 
+<<<<<<< HEAD
 En esta parte lo que hacemos es leer el fichero `medicamentos.csv` y para cada medicamento, descargamos la ficha técnica en PDF y estos se guardan en la carpeta `data/outputs/1_data_acquisition/fetcher` con el siguiente formato: `Nombre_Medicamento.pdf`.  Para ejectutar el spider, se utiliza el siguiente comando:
+=======
+   En esta parte lo que hacemos es leer el fichero `medicamentos.csv` y para cada medicamento, descargamos la ficha técnica en PDF y estos se guardan en la carpeta `data/outputs/1_data_acquisition/fetcher` con el siguiente formato: `Nombre_Medicamento.pdf`. Para ejectutar el spider, se utiliza el siguiente comando:
+>>>>>>> 6ecbf1cd (Chatbot)
 
 ```bash
 python blablabla.py
 ```
 
+<<<<<<< HEAD
 > [!NOTE] 
 > Para ver el contenido que aparece en una ficha técnica haz click [aquí](https://cima.aemps.es/cima/pdfs/ft/99122002/FT_99122002.pdf).
+=======
+   > [!NOTE]
+   > Para ver el contenido que aparece en una ficha técnica haz click [aquí](https://cima.aemps.es/cima/pdfs/ft/99122002/FT_99122002.pdf).
+>>>>>>> 6ecbf1cd (Chatbot)
 
 #### **3. Crawler ⛏️**
 
@@ -98,24 +118,28 @@ python blablabla.py
 <br>
 
 ### **2.2 Preprocesamiento de datos**
+=======
+### 2.2 Preprocesamiento de datos
+
+>>>>>>> 6ecbf1cd (Chatbot)
 Como hemos visto en la sección anterior, para cada uno de los medicamentos obtenemos una sección llamada _ATC_ que contiene el código _ATC_ del medicamento. Los códigos _ATC_ (_Anatomical Therapeutic Chemical_) son un sistema de clasificación para medicamentos que agrupa fármacos según el órgano o sistema sobre el que actúan, así como sus propiedades terapéuticas, farmacológicas y químicas. Se utilizan para estandarizar la clasificación de los medicamentos a nivel internacional, facilitando la investigación, el análisis de tendencias de prescripción y la farmacovigilancia.
 
 Por ello nos parece importante tener también esta información en el _json_ de salida. Investigando un poco encontramos un repositorio con el cual podemos obtener todos los distintos niveles del código _ATC_ y su descripción ([repositorio de códigos ATC](https://github.com/sarrabenyahia/webscrap_health_monitoring.git)). En este econtramos un fichero _csv_ que contiene la información de los códigos _ATC_ y su descripción. Este fichero lo vamos a guardar en la ruta `data/inputs/2_data_preprocessing/Tabla_ATC.csv`.
 
 El problema que encontramos es que esta información está en inglés. Para obtenerla en español traducimos el fichero manualmente y lo guardamos en la ruta `data/inputs/2_data_preprocessing/Tabla_ATC_traducida.csv`. Este fichero contiene la siguiente información:
 
-| Columna        | Descripción                                                                                     |
-|----------------|-------------------------------------------------------------------------------------------------|
-| **ATC code_L1** | Código del nivel 1 del sistema. Formato: `X`  |
-| **name_L1**     | Indica el sistema u órgano principal sobre el que actúan los medicamentos (por ejemplo, "sistema digestivo"). Formato: `X00`  |
-| **ATC code_L2** | Código del nivel 2 del sistema ATC |
+| Columna         | Descripción                                                                                                                    |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| **ATC code_L1** | Código del nivel 1 del sistema. Formato: `X`                                                                                   |
+| **name_L1**     | Indica el sistema u órgano principal sobre el que actúan los medicamentos (por ejemplo, "sistema digestivo"). Formato: `X00`   |
+| **ATC code_L2** | Código del nivel 2 del sistema ATC                                                                                             |
 | **name_L2**     | Describe la subcategoría terapéutica dentro del sistema principal (por ejemplo, "preparados estomatológicos"). Formato: `X00X` |
-| **ATC code_L3** | Código del nivel 3 del sistema ATC |
-| **name_L3**     | Detalla el subgrupo terapéutico específico (por ejemplo, "preparados para el tratamiento de afecciones bucales"). |
-| **ATC code_L4** | Código del nivel 4 del sistema ATC. Formato: `X00XX`|
-| **name_L4**     | Describe el subgrupo químico o farmacológico (por ejemplo, "agentes profilácticos"). |
-| **ATC code_L5** | Código del nivel 5 del sistema ATC. Formato: `X00X00` |
-| **name_L5**     | Indica la sustancia química específica (por ejemplo, "fluoruro de sodio"). |
+| **ATC code_L3** | Código del nivel 3 del sistema ATC                                                                                             |
+| **name_L3**     | Detalla el subgrupo terapéutico específico (por ejemplo, "preparados para el tratamiento de afecciones bucales").              |
+| **ATC code_L4** | Código del nivel 4 del sistema ATC. Formato: `X00XX`                                                                           |
+| **name_L4**     | Describe el subgrupo químico o farmacológico (por ejemplo, "agentes profilácticos").                                           |
+| **ATC code_L5** | Código del nivel 5 del sistema ATC. Formato: `X00X00`                                                                          |
+| **name_L5**     | Indica la sustancia química específica (por ejemplo, "fluoruro de sodio").                                                     |
 
 Por último, una vez conseguida esta información, la unimos al `medicamentos.json` obtenido en la salida de la parte anterior del wrangler y lo guardamos en la ruta `data/outputs/2_data_preprocessing/fichas_tecnicas_mapped_atc.json`.
 
