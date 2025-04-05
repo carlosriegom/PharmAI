@@ -132,7 +132,7 @@ Por último, una vez conseguida esta información, la unimos al `medicamentos.js
 
 Una vez obtenida toda la información de los medicamentos de manera estructurada y limpia, procedemos a realizar un análisis exploratorio de los datos (_EDA_) para obtener información relevante sobre los medicamentos. En esta parte se generan diferentes visualizaciones y gráficos, como wordclouds, para analizar la información de los medicamenos. A continuación se presentan algunas de las visualizaciones generadas:
 
-##### **Distribución de medicamentos según el grupo anatómico (nivel 1 código ATC)**
+#### **Distribución de medicamentos según el grupo anatómico (nivel 1 código ATC)**
 
 ![Distribución de medicamentos según el el grupo anatómico](images/distribucion_grupos_anatomicos.png)
 
@@ -141,7 +141,7 @@ Como observamos, prácticamente la mitad de los medicamentos pertenecen a los gr
 El grupo anatómico `productos antiparasitarios, insecticidas y repelentes` es, con mucha diferencia, el que menos medicamentos tiene.
 Esto quizás nos ponga problemas a la hora de clasificar, ya que el modelo puede no aprender lo suficiente sobre este grupo anatómico.
 
-##### **Wordclouds**
+#### **Wordclouds**
 
 ![Wordcloud Global](images/wordclouds/wordcloud_global.png)
 
