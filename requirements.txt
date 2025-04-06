@@ -96,7 +96,7 @@ tenacity==9.1.2
 threadpoolctl==3.6.0
 tokenizers==0.21.1
 toml==0.10.2
-torch==2.0.1
+torch
 tornado @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_0axef5a0m0/croot/tornado_1733960501260/work
 tqdm==4.67.1
 traitlets @ file:///home/conda/feedstock_root/build_artifacts/traitlets_1733367359838/work
