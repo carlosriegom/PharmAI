@@ -173,7 +173,7 @@ def retrieve_relevant_fragments_prueba(query, model, fragments, index, k=5):
     ]
     return retrieved_fragments
 
-def retrieve_relevant_fragments(query, model, fragments, index, k=10):
+def retrieve_relevant_fragments(query, embedding_model, fragments, index, k=7):
     """
     Realiza una búsqueda en FAISS para encontrar los fragmentos más similares a la consulta.
 
@@ -184,12 +184,9 @@ def retrieve_relevant_fragments(query, model, fragments, index, k=10):
     Retorna:
     - Lista de fragmentos de texto relevantes.
     """
-
-    # Converir la consulta a minúsculas
-    query = query.lower()
     
     # Convertir la consulta en embedding
-    query_embedding = model.encode(query, convert_to_numpy=True).reshape(1, -1)
+    query_embedding = embedding_model.encode(query, convert_to_numpy=True).reshape(1, -1)
 
     # Buscar los k embeddings más cercanos
     distances, indices = index.search(query_embedding, k)
@@ -271,7 +268,9 @@ def build_prompt(context, query):
     - Información: Texto relevante sobre el medicamento, el cual debes analizar antes de responder.
 
     3. FORMATO DE RESPUESTA:
-    Debes responder de manera clara y precisa a la pregunta formulada por el usuario, utilizando ÚNICAMENTE el contexto que se te está proporcionando. Si la información proporcionada no es suficiente para responder completamente, indica qué datos faltan.
+    - Debes responder de manera clara y precisa a la pregunta formulada por el usuario, utilizando ÚNICAMENTE el contexto que se te está proporcionando. 
+    - Si la información proporcionada no es suficiente para responder completamente, indica qué datos faltan.
+    - Incluye una mención explícita a los textos que respaldan tu respuesta, indicando para todos ellos el medicamento y la categoría.
 
     4. EJEMPLOS DE CONSULTA Y DE RESPUESTA:
     - EJEMPLO 1:
@@ -281,7 +280,8 @@ def build_prompt(context, query):
             "categoria": "efectos_secundarios"
             "texto": "Puede causar náuseas y dolor de estómago."
         Respuesta:
-        La aspirina puede causar efectos secundarios como náuseas y dolor de estómago, según la información proporcionada en el fragmento. Si necesitas más detalles, por favor consulta la ficha técnica completa.
+        La aspirina puede causar efectos secundarios como náuseas y dolor de estómago (extraído de la sección "efectos_secundarios" del medicamento "ASPIRINA": "la aspirina tiene como efectos secundarios, entre ottros, la aparición de náuseas y dolor de tripa"). Si necesitas más detalles, por favor consulta la ficha técnica completa.
+
     - EJEMPLO 2:
         Pregunta: ¿Puedo tomar medicamentoA si estoy embarazada?
         Contexto:
@@ -289,7 +289,7 @@ def build_prompt(context, query):
             "categoria": "contraindicaciones"
             "texto": "No se recomienda su uso durante el embarazo."
         Respuesta:
-        No se recomienda el uso de medicamentoA durante el embarazo, según la información proporcionada en el fragmento. Si necesitas más detalles, por favor consulta la ficha técnica completa.
+        No se recomienda el uso de medicamentoA durante el embarazo (extraído de la sección "fertilidad_embarazo" del medicamento "medicamentoA": "el uso de medicamentoA durante el embarazo puede entrañar riesgos, por lo que se desaconseja totalmente su uso en embarazadas"). Si necesitas más detalles, por favor consulta la ficha técnica completa.
 
     5. INSTRUCCIONES FINALES:
     Básandote ÚNICAMENTE en la información proporcionada en ({context}), responde a la siguiente pregunta:
@@ -340,9 +340,9 @@ def generate_answer(query, context, tokenizer, model):
     with torch.no_grad():
         output_ids = model.generate(
             input_ids,
-            max_length=len(input_ids[0]) + 1000,  # Limita la longitud de salida
+            max_length=len(input_ids[0]) + 2000,  # Limita la longitud de salida
             do_sample=True,
-            temperature=0.2,
+            temperature=0.1,
             top_p=0.9,
             repetition_penalty=1.2,
         )
@@ -373,12 +373,12 @@ def answer_query(query, model, tokenizer):
 
     # 2. Recuperamos los fragmentos relevantes para la consulta
     embedding_model = SentenceTransformer("all-MiniLM-L6-v2") # old
-    fragments = load_json("../../data/outputs/5_chatbot/contexto_medicamentos_chatbot.json") 
-    index = faiss.read_index("../../data/outputs/5_chatbot/faiss_index_old.bin") # old
+    fragments = load_json("./data/outputs/5_chatbot/contexto_medicamentos_chatbot.json") 
+    index = faiss.read_index("./data/outputs/5_chatbot/faiss_index_all-MiniLM-L6-v2.bin") # old
 
     # 3. Busca los fragmentos relevantes
-    retrieved_fragments = retrieve_relevant_fragments_prueba(query, embedding_model, fragments, index, k=10)
-    #retrieved_fragments = retrieve_relevant_fragments(query, embedding_model, fragments, index, k=7)
+    retrieved_fragments = retrieve_relevant_fragments_prueba(query, embedding_model, fragments, index, k=5)
+    #retrieved_fragments = retrieve_relevant_fragments(query, embedding_model, fragments, index, k=10)
 
     # 4. Aplicamos formateo al contexto
     print(f"Fragmentos recuperados: {retrieved_fragments}")
