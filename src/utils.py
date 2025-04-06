@@ -367,20 +367,24 @@ def answer_query(query, model, tokenizer):
     Retorna:
     - str: Respuesta generada
     """
-    # 1. Recuperamos los fragmentos relevantes para la consulta
-    embedding_model = SentenceTransformer("all-MiniLM-L6-v2") # old
-    fragments = load_json("./data/outputs/5_chatbot/contexto_medicamentos_chatbot.json") 
-    index = faiss.read_index("./data/outputs/5_chatbot/faiss_index_old.bin") # old
 
-    # Busca los fragmentos relevantes
+    # 1. Converir la consulta a minúsculas
+    query = query.lower()
+
+    # 2. Recuperamos los fragmentos relevantes para la consulta
+    embedding_model = SentenceTransformer("all-MiniLM-L6-v2") # old
+    fragments = load_json("../../data/outputs/5_chatbot/contexto_medicamentos_chatbot.json") 
+    index = faiss.read_index("../../data/outputs/5_chatbot/faiss_index_old.bin") # old
+
+    # 3. Busca los fragmentos relevantes
     retrieved_fragments = retrieve_relevant_fragments_prueba(query, embedding_model, fragments, index, k=10)
     #retrieved_fragments = retrieve_relevant_fragments(query, embedding_model, fragments, index, k=7)
 
-    # 2. Aplicamos formateo al contexto
+    # 4. Aplicamos formateo al contexto
     print(f"Fragmentos recuperados: {retrieved_fragments}")
     context = format_context(retrieved_fragments)
 
-    # 3. Generamos la respuesta del modelo
+    # 5. Generamos la respuesta del modelo
     print(f"Contexto: {context}")
     response = generate_answer(query, context, tokenizer, model)
 
