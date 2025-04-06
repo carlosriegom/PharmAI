@@ -1,10 +1,21 @@
 import streamlit as st
 import os
 import sys
+import json
+import numpy as np
+import torch
+import sys
+import os
+from sentence_transformers import SentenceTransformer
+import seaborn as sns
+import faiss
+from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, GPT2Tokenizer, GPT2LMHeadModel
+import matplotlib.pyplot as plt
 
-# Agrega la ruta del directorio donde está el utils al path de Python
-sys.path.append(os.path.abspath(os.getcwd()))
-from utils_chatbot_streamlit import *
+# Funciones chatbot
+# Agrega la ruta del directorio donde están las funciones del chatbot
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "src")))
+from utils import *
 
 # Configuración de la página
 st.set_page_config(page_title="PharmAI Chatbot", page_icon="💊")
@@ -20,19 +31,19 @@ for msg in st.session_state.messages:
         st.markdown(msg["content"])
 
 # Entrada del usuario
-prompt = st.chat_input("Escribe tu pregunta sobre un medicamento...")
+query = st.chat_input("Escribe tu pregunta sobre un medicamento...")
 
-if prompt:
+if query:
     # Mostrar el mensaje del usuario
-    st.session_state.messages.append({"role": "user", "content": prompt})
+    st.session_state.messages.append({"role": "user", "content": query})
     with st.chat_message("user"):
-        st.markdown(prompt)
+        st.markdown(query)
 
-    # Buscar los fragmentos más relevantes con FAISS
-    fragments = search_faiss(prompt, k=5)
+    # 1. Cargar modelo 
+    model, tokenizer = load_llama_model()
 
-    # Generar la respuesta con tu función real
-    respuesta = answer_query(prompt, fragments)
+    # 2. Generar respuesta
+    respuesta = answer_query(query, model, tokenizer)
 
     # Mostrar y guardar la respuesta del asistente
     st.session_state.messages.append({"role": "assistant", "content": respuesta})
