@@ -1,4 +1,4 @@
-# utils.py
+# utils_chatbot_streamlit.py
 
 import json
 import numpy as np

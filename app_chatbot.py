@@ -1,8 +1,10 @@
 import streamlit as st
-from utils_chatbot_streamlit.procesar_json_para_chatbot import (
-    search_faiss,
-    answer_query,
-)
+import os
+import sys
+
+# Agrega la ruta del directorio donde está el utils al path de Python
+sys.path.append(os.path.abspath(os.getcwd()))
+from utils_chatbot_streamlit import *
 
 # Configuración de la página
 st.set_page_config(page_title="PharmAI Chatbot", page_icon="💊")
