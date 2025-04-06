@@ -121,8 +121,9 @@ def load_llama_model():
     print("Usando dispositivo:", device)
 
     # Nombre del modelo a cargar (Llama-2-7b)
-    model_name = "meta-llama/Llama-2-7b-hf"
-
+    #model_name = "meta-llama/Llama-2-7b-hf" # Llama2 normal
+    model_name = "meta-llama/Llama-2-7b-chat-hf" # Llama2 chat
+    
     # Cargar el tokenizador
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False)
 
@@ -149,7 +150,7 @@ def retrieve_relevant_fragments_prueba(query, model, fragments, index, k=5):
     # Simulación de la búsqueda, usando FAISS o similar.
     # Esto debería ser reemplazado por la implementación real que recupera los fragmentos relevantes.
     # Suponemos que "retrieved_fragments" es el resultado de una búsqueda en base de datos vectorial.
-
+    '''
     retrieved_fragments = [
         {
             "medicamento": "Aspirina",
@@ -161,6 +162,14 @@ def retrieve_relevant_fragments_prueba(query, model, fragments, index, k=5):
             "categoria": "efectos_secundarios",
             "texto": "Puede causar problemas hepáticos en dosis altas.",
         },
+    ]
+    '''
+    retrieved_fragments = [
+        {
+            "medicamento": "Paracetamol",
+            "categoria": "efectos_secundarios",
+            "texto": "Puede causar problemas hepáticos en dosis altas.",
+        }
     ]
     return retrieved_fragments
 
@@ -175,6 +184,10 @@ def retrieve_relevant_fragments(query, model, fragments, index, k=10):
     Retorna:
     - Lista de fragmentos de texto relevantes.
     """
+
+    # Converir la consulta a minúsculas
+    query = query.lower()
+    
     # Convertir la consulta en embedding
     query_embedding = model.encode(query, convert_to_numpy=True).reshape(1, -1)
 
@@ -270,13 +283,13 @@ def build_prompt(context, query):
         Respuesta:
         La aspirina puede causar efectos secundarios como náuseas y dolor de estómago, según la información proporcionada en el fragmento. Si necesitas más detalles, por favor consulta la ficha técnica completa.
     - EJEMPLO 2:
-        Pregunta: ¿Puedo tomar aspirina si estoy embarazada?
+        Pregunta: ¿Puedo tomar medicamentoA si estoy embarazada?
         Contexto:
-            "medicamento": "Aspirina"
+            "medicamento": "medicamentoA"
             "categoria": "contraindicaciones"
             "texto": "No se recomienda su uso durante el embarazo."
         Respuesta:
-        No se recomienda el uso de aspirina durante el embarazo, según la información proporcionada en el fragmento. Si necesitas más detalles, por favor consulta la ficha técnica completa.
+        No se recomienda el uso de medicamentoA durante el embarazo, según la información proporcionada en el fragmento. Si necesitas más detalles, por favor consulta la ficha técnica completa.
 
     5. INSTRUCCIONES FINALES:
     Básandote ÚNICAMENTE en la información proporcionada en ({context}), responde a la siguiente pregunta:
@@ -287,7 +300,8 @@ def build_prompt(context, query):
     - Si es posible, referencia el fragmento específico que respalda tu respuesta, indicando el medicamento y la categoría.
     - Si la información proporcionada no es suficiente para responder completamente, indica qué datos faltan.
     - Si la pregunta no está relacionada con medicamentos, indica que no puedes ayudar en ese caso.
-    """
+
+    Respuesta:"""
     return prompt
 
 def generate_answer(query, context, tokenizer, model):
@@ -299,7 +313,6 @@ def generate_answer(query, context, tokenizer, model):
     - context (string): Texto formateado con los fragmentos recuperados 
     - tokenizer: Tokenizador del modelo
     - model: Modelo generativo
-    - max_fragments (int): Número máximo de fragmentos a utilizar
 
     Retorna:
     - str: Respuesta generada
@@ -329,7 +342,7 @@ def generate_answer(query, context, tokenizer, model):
             input_ids,
             max_length=len(input_ids[0]) + 1000,  # Limita la longitud de salida
             do_sample=True,
-            temperature=0.7,
+            temperature=0.2,
             top_p=0.9,
             repetition_penalty=1.2,
         )
@@ -356,12 +369,12 @@ def answer_query(query, model, tokenizer):
     """
     # 1. Recuperamos los fragmentos relevantes para la consulta
     embedding_model = SentenceTransformer("all-MiniLM-L6-v2") # old
-    fragments = load_json("../../data/outputs/5_chatbot/contexto_medicamentos_chatbot.json") # old
-    index = faiss.read_index("../../data/outputs/5_chatbot/faiss_index_old.bin") # old
+    fragments = load_json("./data/outputs/5_chatbot/contexto_medicamentos_chatbot.json") 
+    index = faiss.read_index("./data/outputs/5_chatbot/faiss_index_old.bin") # old
 
     # Busca los fragmentos relevantes
     retrieved_fragments = retrieve_relevant_fragments_prueba(query, embedding_model, fragments, index, k=10)
-    #retrieved_fragments = retrieve_relevant_fragments(query, embedding_model, fragments, index, k=10)
+    #retrieved_fragments = retrieve_relevant_fragments(query, embedding_model, fragments, index, k=7)
 
     # 2. Aplicamos formateo al contexto
     print(f"Fragmentos recuperados: {retrieved_fragments}")
