@@ -96,13 +96,15 @@ python blablabla.py
 >         "Propiedades_farmacocineticas": "...",
 >         "excipientes": "...",
 >         "incompatibilidades": "...",
->        "precauciones_conservacion": "...",
+>         "precauciones_conservacion": "...",
 >         "fecha_revision": "..."
 >      }, ...
 > ```
 
 <br>
 <br>
+
+---
 
 ### **2.2 Preprocesamiento de datos**
 
@@ -127,8 +129,45 @@ El problema que encontramos es que esta información está en inglés. Para obte
 
 Por último, una vez conseguida esta información, la unimos al `medicamentos.json` obtenido en la salida de la parte anterior del wrangler y lo guardamos en la ruta `data/outputs/2_data_preprocessing/fichas_tecnicas_mapped_atc.json`.
 
+> [!NOTE]
+> Finalmente, el fichero _json_ de salida tiene la siguiente estructura:
+>
+> ```json
+>   {
+>         "indicaciones": "...",
+>         "posologia": "...",
+>         "contraindicaciones": "...",
+>         "advertencias": "...",
+>         "interacciones": "...",
+>         "fertilidad_embarazo": "...",
+>         "efectos_conducir": "...",
+>         "reacciones_adversas": "...",
+>         "sobredosis": "...",
+>         "ATC": "...",
+>         "Propiedades_farmacocineticas": "...",
+>         "excipientes": "...",
+>         "incompatibilidades": "...",
+>         "precauciones_conservacion": "...",
+>         "fecha_revision": "...",
+>         "nombre_medicamento_completo": "...",
+>         "nombre_medicamento": "...",
+>         "ATC_Nivel_Anatomico": "...",
+>         "Descripcion_Nivel_Anatomico": "...",
+>         "ATC_Nivel_2_Subgrupo_Terapeutico": "...",
+>         "Descripcion_Nivel_2_Subgrupo_Terapeutico": "...",
+>         "ATC_Nivel_3_Subgrupo_Terapeutico_Farmacologico": "...",
+>         "Descripcion_Nivel_3_Subgrupo_Terapeutico_Farmacologico": "...",
+>         "ATC_Nivel_4_Subgrupo_Terapeutico_Farmacologico_Quimico": "...",
+>         "Descripcion_Nivel_4_Subgrupo_Terapeutico_Farmacologico_Quimico": "...",
+>         "ATC_Nivel_5_Principio_Activo": "...",
+>         "Descripcion_Nivel_5_Principio_Activo": "...",
+>    }, ...
+> ```
+
 <br>
 <br>
+
+---
 
 ### **2.3 Análisis exploratorio de datos (_EDA_)**
 
@@ -249,6 +288,8 @@ Ahora mostramos la correlación entre las longitudes de los textos de las difere
 
 Es decir, la correlación de Spearman nos permite confirmar si, independientemente de la magnitud exacta de las longitudes, dos secciones tienden a aumentar o disminuir juntas. Como vemos, ahora tenemos correlaciones más altas entre las longitudes de los textos de las secciones dado que estamos omitiendo ese "ruido" que nos aportan los _outliers_. Por ejemplo, vemos que ahora tenemos una correlación de $0.61$ entre `interacciones` y `advertencias`, así como una correlación de $0.60$ entre `fertilidad_embarazo` y `advertencias`, mientras que antes, con la correlación de _Pearson_, teníamos una correlación de $0.39$ y $0.46$ respectivamente.
 
+---
+
 ### **2.4 Machine Learning: clasificación de medicamentos**
 
 En esta sección se han desarrollado dos modelos de clasificación para predecir la descripción del nivel anatómico de los medicamentos a partir de sus fichas técnicas. Se ha empleado una regresión logística y un modelo de _Random Forest_ para abordar el problema. Para ambos modelos se han empleado la matriz _TF-IDF_ conseguida en el apartado anterior para conseguir resultados óptimos al clasificar los medicamentos con un porcentaje de entrenamiento del $80\%$ y un porcentaje de test del $20\%$.
@@ -300,8 +341,61 @@ En cambio, para el modelo de _Random Forest_ no es posible obtener la palabras c
 
 #### **Predicción de nivel anatómico**
 
-Haría en streamlit que puedieses elegir un medicamento de los 20.000 que hay y que te de la probabilidad de cada uno de los niveles anatómicos.
+En la última parte del notebook, tras haber ejecutado todas la celdas anteriores, tenemos un ejercicio donde podemos elgegir cualquier medicamento de los 20.000 que hay y hacer una predicción de la clase del nivel anatómico al que pertenece.
+
+El procedimiento es el siguiente: solicitamos al usuario que introduzca el índice de un medicamento. Despues, se extrae el texto completo de la del medicamento, y por ende, de la ficha técnica del medicamento seleccionado (columna `texto_completo`) y se transforma a su representación numérica mediante el vectorizador TF-IDF previamente entrenado. Esto convierte el texto en un vector que los modelos pueden procesar. Y por último, se predice la probabilidad de pertenecer a cada clase.
+
+---
 
 ### **2.5 Deep Learning: chatbot**
 
-Hay que meter el enlace del chatbot de streamlit y el modelo de _Deep Learning_ que se ha utilizado para entrenar el modelo.
+Por último, hemos intentado recrear un chatbot que pueda responder a preguntas sobre los medicamentos. Para ello hemos realizado el siguiente procedimiento.
+
+Primero debemos reestructurar el fichero _json_ para facilitar la búsqueda de información en la base de datos vectorial que generaremos después. Ahora en vez de tener un diccionario para cada medicamento con todas las secciones correspondientes, tenemos un diccionario para cada sección de cada medicamento.
+
+> [!NOTE]
+> Ahora la estructura del _json_ es la siguiente:
+>
+> ```python
+> [
+>    {
+>        "medicamento": "Paracetamol",
+>        "nombre_completo_medicamenti": "posologia",
+>         "categoria": "indicaciones",
+>         "texto": "en base a su efecto antiagregante plaquetario está indicado en..."
+>     },
+>     {
+>         "medicamento": "Ibuprofeno",
+>         "categoria": "advertencias",
+>         "texto": "Dado el efecto antiagregante plaquetario del ibuprofeno..."
+>    },
+>     ...
+> ]
+> ```
+
+Continuaremos generando _embeddings_ para cada uno de los textos de las secciones de los medicamentos. Para ello utilizamos el modelo `all-MiniLM-L6-v2` de _Sentence Transformers_. Estos capturan la semántica del texto permitiendo realizar búsquedas por significado en lugar de solo coincidencias de palabras. Esto es útil para responder preguntas complejas o encontrar información relacionada en el corpus de medicamentos.
+
+Según esto, el _embedding_ de cada texto es un vector de 384 dimensiones. En nuestro caso tenemos un tamaño de: $(289708, 384)$. Esto quiere decir que tenemos 289.708 textos y cada uno de ellos tiene un vector de 384 dimensiones. Por lo tanto, tenemos más de 111 millones de números que representan el corpus de medicamentos. Todo esto lo guardamos en la ruta `../../data/outputs/5_chatbot/embeddings_all-MiniLM-L6-v2.npy`.
+
+Seguiremos almacenando estos _embeddings_ en una base de datos vectorial _`FAISS`_ usando _`IndexFlatL2`_ . Un índice en _`FAISS`_ es una estructura optimizada para almacenar y buscar embeddings. _`IndexFlatL2`_ es un tipo de índice simple que usa distancia Euclidiana (_L2_) para comparar vectores. La distancia _L2_ (Euclidiana) entre dos vectores es la raíz cuadrada de la suma de las diferencias al cuadrado entre sus componentes.
+
+$$
+d(\mathbf{x}, \mathbf{y}) = \sqrt{\sum_{i=1}^{n} (x_i - y_i)^2}
+$$
+
+Esta se usa para medir la similitud entre dos vectores. Cuanto más cerca estén los vectores, menor será la distancia. Por lo tanto, se usa para medir la similitud: menor distancia = mayor similitud.
+
+Después, tenemos que realizar el siguiente procedimiento para conseguir hacer búsquedas en la base de datos vectorial. Los pasos son los siguientes:
+
+1. Cargamos el índice _`FAISS`_ desde el archivo guardado.
+2. Cargamos los fragmentos de texto originales para poder recuperar la información relevante.
+3. Convertimos la consulta en un embedding usando el mismo modelo `all-MiniLM-L6-v2`.
+4. Buscamos los embeddings más cercanos en _`FAISS`_ usando la distancia _L2_.
+5. Recuperamos los fragmentos de texto asociados a los embeddings más cercanos.
+6. Devolvemos los fragmentos más relevantes como resultados.
+
+Después de realizar este procedimiento, lo que tenemos es el 'contexto' de la pregunta que nos ha hecho el usuario y así poder responder a la pregunta de manera más precisa.
+
+Finalmente, lo que hacemos es pasar a un modelo de lenguaje preentrenado, en este caso el modelo `LLama2 Chat 7b` de _Meta_, el contexto que hemos obtenido y la pregunta del usuario. Este modelo es capaz de generar respuestas coherentes y relevantes basadas en el contexto proporcionado. Por lo tanto, el modelo generará una respuesta a la pregunta del usuario utilizando el contexto que le hemos proporcionado. A continuación se muestra un ejemplo de pregunta y respuesta generada por el modelo:
+
+![Chatbot](images/chatbot/chatbot_ibuprofeno_efectos_conducir.jpg)
