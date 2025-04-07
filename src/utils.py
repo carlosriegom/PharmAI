@@ -108,8 +108,7 @@ def load_json(file_path):
     return data
 
 ##-------FUNCIONES PARA CHATBOT------------------------------------------------------------##
-def load_llama_model():
-
+def load_llama_model(token):
     # Detectar el dispositivo disponible: CUDA, MPS (para Mac con Apple Silicon) o CPU
     if torch.cuda.is_available():
         device = "cuda"
@@ -120,18 +119,22 @@ def load_llama_model():
 
     print("Usando dispositivo:", device)
 
-    # Nombre del modelo a cargar (Llama-2-7b)
-    #model_name = "meta-llama/Llama-2-7b-hf" # Llama2 normal
-    model_name = "meta-llama/Llama-2-7b-chat-hf" # Llama2 chat
+    # Nombre del modelo a cargar (Llama-2-7b Chat)
+    model_name = "meta-llama/Llama-2-7b-chat-hf"
     
-    # Cargar el tokenizador
-    tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False)
+    # Cargar el tokenizador incluyendo el token de autenticación
+    tokenizer = AutoTokenizer.from_pretrained(
+        model_name,
+        use_fast=False,
+        token=token  # Se utiliza el token cargado desde el entorno
+    )
 
-    # Cargar el modelo, especificando el tipo de datos y usando device_map="auto" para aprovechar la GPU
+    # Cargar el modelo, especificando el tipo de datos y usando device_map="auto"
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
-        torch_dtype=torch.float16 if device in ["cuda", "mps"] else torch.float32,
         device_map="auto",
+        torch_dtype=torch.float16 if device in ["cuda", "mps"] else torch.float32,
+        token=token  # Se utiliza el token para autenticar la descarga
     )
 
     return model, tokenizer
@@ -269,37 +272,23 @@ def build_prompt(context, query):
 
     3. FORMATO DE RESPUESTA:
     - Debes responder de manera clara y precisa a la pregunta formulada por el usuario, utilizando ÚNICAMENTE el contexto que se te está proporcionando. 
-    - Si la información proporcionada no es suficiente para responder completamente, indica qué datos faltan.
+    - No debes inventar información ni suponer datos que no estén presentes en el contexto.
+    - Si la información proporcionada no es suficiente para responder completamente, dilo e indica qué datos faltan.
     - Incluye una mención explícita a los textos que respaldan tu respuesta, indicando para todos ellos el medicamento y la categoría.
+    - Si la pregunta no está relacionada con medicamentos, indica que no puedes ayudar en ese caso.
 
-    4. EJEMPLOS DE CONSULTA Y DE RESPUESTA:
-    - EJEMPLO 1:
-        Pregunta: ¿Cuáles son los efectos secundarios de la aspirina?
-        Contexto:
-            "medicamento": "Aspirina"
-            "categoria": "efectos_secundarios"
-            "texto": "Puede causar náuseas y dolor de estómago."
-        Respuesta:
-        La aspirina puede causar efectos secundarios como náuseas y dolor de estómago (extraído de la sección "efectos_secundarios" del medicamento "ASPIRINA": "la aspirina tiene como efectos secundarios, entre ottros, la aparición de náuseas y dolor de tripa"). Si necesitas más detalles, por favor consulta la ficha técnica completa.
-
-    - EJEMPLO 2:
-        Pregunta: ¿Puedo tomar medicamentoA si estoy embarazada?
-        Contexto:
-            "medicamento": "medicamentoA"
-            "categoria": "contraindicaciones"
-            "texto": "No se recomienda su uso durante el embarazo."
-        Respuesta:
-        No se recomienda el uso de medicamentoA durante el embarazo (extraído de la sección "fertilidad_embarazo" del medicamento "medicamentoA": "el uso de medicamentoA durante el embarazo puede entrañar riesgos, por lo que se desaconseja totalmente su uso en embarazadas"). Si necesitas más detalles, por favor consulta la ficha técnica completa.
+    4. EJEMPLO DE CONSULTA Y DE RESPUESTA ESPERADA:
+    Pregunta: ¿Cuáles son los efectos secundarios de la aspirina?
+    Contexto:
+        "medicamento": "Aspirina"
+        "categoria": "efectos_secundarios"
+        "texto": "Puede causar náuseas y dolor de estómago."
+    Respuesta:
+    La aspirina puede causar efectos secundarios como náuseas y dolor de estómago (extraído de la ficha técnica, de la sección "efectos_secundarios" del medicamento "ASPIRINA": "la aspirina tiene como efectos secundarios, entre ottros, la aparición de náuseas y dolor de tripa"). Si necesitas más detalles, por favor consulta la ficha técnica completa.
 
     5. INSTRUCCIONES FINALES:
     Básandote ÚNICAMENTE en la información proporcionada en ({context}), responde a la siguiente pregunta:
     {query}
-
-    6. RECUERDA:
-    - No debes inventar información ni suponer datos que no estén presentes en el contexto.
-    - Si es posible, referencia el fragmento específico que respalda tu respuesta, indicando el medicamento y la categoría.
-    - Si la información proporcionada no es suficiente para responder completamente, indica qué datos faltan.
-    - Si la pregunta no está relacionada con medicamentos, indica que no puedes ayudar en ese caso.
 
     Respuesta:"""
     return prompt
