@@ -64,7 +64,7 @@ if query:
         st.markdown(query)
 
     # 1. Cargar modelo
-    model, tokenizer = load_llama_model()
+    model, tokenizer = load_llama_model(token)
 
     # 2. Generar respuesta
     respuesta = answer_query(query, model, tokenizer)
