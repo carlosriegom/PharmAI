@@ -1,10 +1,12 @@
 import asyncio
 
 # Asegurarse de que haya un loop activo
+'''
 try:
     asyncio.get_running_loop()
 except RuntimeError:
     asyncio.set_event_loop(asyncio.new_event_loop())
+'''
 
 # ========================
 # 📦 Librerías externas
@@ -64,7 +66,13 @@ if query:
         st.markdown(query)
 
     # 1. Cargar modelo
-    model, tokenizer = load_llama_model(token)
+    @st.cache_resource
+    def load_model_and_tokenizer(token):
+        from utils import load_llama_model
+        return load_llama_model(token)
+
+    # Luego, en lugar de llamar a load_llama_model directamente:
+    model, tokenizer = load_model_and_tokenizer(token)
 
     # 2. Generar respuesta
     respuesta = answer_query(query, model, tokenizer)
