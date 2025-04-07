@@ -1,2 +1,2 @@
-[global]
-server.fileWatcherType = "none"
+[server]
+fileWatcherType = "none"
