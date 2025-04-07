@@ -16,3 +16,4 @@ torch
 transformers
 unidecode
 wordcloud
+sentencepiece
