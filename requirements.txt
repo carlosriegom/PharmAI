@@ -1,4 +1,5 @@
 bitsandbytes
+dotenv
 faiss-cpu
 matplotlib
 nltk
