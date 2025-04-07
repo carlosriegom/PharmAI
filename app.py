@@ -26,6 +26,7 @@ from transformers import (
     GPT2Tokenizer,
     GPT2LMHeadModel,
 )
+from transformers.modeling_utils import init_empty_weights
 from dotenv import load_dotenv
 import huggingface_hub
 
