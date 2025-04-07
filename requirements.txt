@@ -13,7 +13,8 @@ seaborn
 sentence-transformers
 streamlit
 torch
-transformers>=4.52.0
+transformers==4.50.3
+accelerate
 unidecode
 wordcloud
 sentencepiece
