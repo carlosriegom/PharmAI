@@ -108,7 +108,6 @@ def load_json(file_path):
     return data
 
 ##-------FUNCIONES PARA CHATBOT------------------------------------------------------------##
-'''
 def load_llama_model(token):
     # Detectar el dispositivo disponible: CUDA, MPS (para Mac con Apple Silicon) o CPU
     if torch.cuda.is_available():
@@ -136,68 +135,6 @@ def load_llama_model(token):
         device_map="auto",
         torch_dtype=torch.float16 if device in ["cuda", "mps"] else torch.float32,
         token=token  # Se utiliza el token para autenticar la descarga
-    )
-
-    return model, tokenizer
-'''
-
-def load_llama_model(token):
-    import torch
-    from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
-
-    # Detectar el dispositivo disponible: CUDA, MPS (para Mac con Apple Silicon) o CPU
-    if torch.cuda.is_available():
-        device = "cuda"
-    elif torch.backends.mps.is_available():
-        device = "mps"
-    else:
-        device = "cpu"
-
-    print("Usando dispositivo:", device)
-
-    # =============================================================
-    # Opción 1: Modelo original Llama‑2‑7b-chat-hf (actualmente comentado)
-    # =============================================================
-    # model_name = "meta-llama/Llama-2-7b-chat-hf"
-    #
-    # tokenizer = AutoTokenizer.from_pretrained(
-    #     model_name,
-    #     use_fast=False,
-    #     token=token  # Se utiliza el token para autenticar la descarga
-    # )
-    #
-    # model = AutoModelForCausalLM.from_pretrained(
-    #     model_name,
-    #     device_map="auto",
-    #     torch_dtype=torch.float16 if device in ["cuda", "mps"] else torch.float32,
-    #     token=token  # Se utiliza el token para autenticar la descarga
-    # )
-
-    # =============================================================
-    # Opción 2: Modelo más sencillo en 4 bits (ejemplo con GPT‑2)
-    # =============================================================
-    # Nota: GPT-2 es solo un ejemplo de modelo sencillo; si dispones de otro modelo
-    # que prefieras cuantizar en 4 bits, reemplaza "gpt2" por el nombre correspondiente.
-    model_name = "gpt2"
-    tokenizer = AutoTokenizer.from_pretrained(
-        model_name,
-        use_fast=False
-    )
-
-    # Configurar BitsAndBytes para 4-bit
-    bnb_config = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_quant_type="nf4",           # Puede ser "nf4" o "normal"
-        bnb_4bit_use_double_quant=True,
-        bnb_4bit_compute_dtype=torch.float16  # O torch.float32, según tus necesidades
-    )
-
-    model = AutoModelForCausalLM.from_pretrained(
-        model_name,
-        device_map="cpu",                    # Forzamos la carga en CPU
-        load_in_4bit=True,                   # Activamos el modo 4-bit
-        quantization_config=bnb_config,      # Aplicamos la configuración de 4-bit
-        torch_dtype=torch.float16 if device in ["cuda", "mps"] else torch.float32,
     )
 
     return model, tokenizer
