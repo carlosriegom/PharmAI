@@ -1,5 +1,5 @@
 bitsandbytes
-dotenv
+python-dotenv
 faiss-cpu
 matplotlib
 nltk
@@ -18,3 +18,4 @@ accelerate
 unidecode
 wordcloud
 sentencepiece
+huggingface-hub
