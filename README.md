@@ -360,12 +360,13 @@ Primero debemos reestructurar el fichero _json_ para facilitar la búsqueda de i
 > [
 >    {
 >        "medicamento": "Paracetamol",
->        "nombre_completo_medicamenti": "posologia",
->         "categoria": "indicaciones",
->         "texto": "en base a su efecto antiagregante plaquetario está indicado en..."
+>        "nombre_completo_medicamento": "Paracetamol",
+>        "categoria": "indicaciones",
+>        "texto": "en base a su efecto antiagregante plaquetario está indicado en..."
 >     },
 >     {
 >         "medicamento": "Ibuprofeno",
+>         "nombre_completo_medicamento": "
 >         "categoria": "advertencias",
 >         "texto": "Dado el efecto antiagregante plaquetario del ibuprofeno..."
 >    },
@@ -394,7 +395,7 @@ Después, tenemos que realizar el siguiente procedimiento para conseguir hacer b
 5. Recuperamos los fragmentos de texto asociados a los embeddings más cercanos.
 6. Devolvemos los fragmentos más relevantes como resultados.
 
-Después de realizar este procedimiento, lo que tenemos es el 'contexto' de la pregunta que nos ha hecho el usuario y así poder responder a la pregunta de manera más precisa.
+Después de realizar este procedimiento, lo que tenemos es el 'contexto' de la pregunta que nos ha hecho el usuario y así poder responder a la pregunta de manera más precisa. El 'contexto' estará formado por los 10 fragmentos más parecidos a la _query_ de la consulta, es decir, la menor distancia entre los embeddings encontrados con el embedding de la _query_.
 
 Finalmente, lo que hacemos es pasar a un modelo de lenguaje preentrenado, en este caso el modelo `LLama2 Chat 7b` de _Meta_, el contexto que hemos obtenido y la pregunta del usuario. Este modelo es capaz de generar respuestas coherentes y relevantes basadas en el contexto proporcionado. Por lo tanto, el modelo generará una respuesta a la pregunta del usuario utilizando el contexto que le hemos proporcionado. A continuación se muestra un ejemplo de pregunta y respuesta generada por el modelo:
 
