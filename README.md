@@ -362,13 +362,13 @@ Primero debemos reestructurar el fichero _json_ para facilitar la búsqueda de i
 > [
 >    {
 >        "medicamento": "Paracetamol",
->        "nombre_completo_medicamento": "Paracetamol",
+>        "nombre_completo_medicamento": "PARACETAMOL_NORMON_500_mg _OMPRIMIDOS_EFG",
 >        "categoria": "indicaciones",
 >        "texto": "en base a su efecto antiagregante plaquetario está indicado en..."
 >     },
 >     {
 >         "medicamento": "Ibuprofeno",
->         "nombre_completo_medicamento": "
+>         "nombre_completo_medicamento": "IBUPROFENO_WINADOL_600_mg_COMPRIMIDOS_RECUBIERTOS_CON_PELICULA_EFG",
 >         "categoria": "advertencias",
 >         "texto": "Dado el efecto antiagregante plaquetario del ibuprofeno..."
 >    },
