@@ -12,9 +12,11 @@
 
 ## **1. Requisitos**
 
-Para poder ejecutar el proyecto, es necesario tener instalado Python 3.11.11 o superior y las siguientes librerías:
+Para poder ejecutar el proyecto, tenemos que crear un entorno conda con Python 3.11.11 o superior y las siguientes librerías:
 
 ```bash
+conda create -n pharmAI python=3.11.11
+conda activate pharmAI
 pip install -r requirements.txt
 ```
 
