@@ -399,3 +399,25 @@ Después de realizar este procedimiento, lo que tenemos es el 'contexto' de la p
 Finalmente, lo que hacemos es pasar a un modelo de lenguaje preentrenado, en este caso el modelo `LLama2 Chat 7b` de _Meta_, el contexto que hemos obtenido y la pregunta del usuario. Este modelo es capaz de generar respuestas coherentes y relevantes basadas en el contexto proporcionado. Por lo tanto, el modelo generará una respuesta a la pregunta del usuario utilizando el contexto que le hemos proporcionado. A continuación se muestra un ejemplo de pregunta y respuesta generada por el modelo:
 
 ![Chatbot](images/chatbot/chatbot_ibuprofeno_efectos_conducir.jpg)
+
+A continuación se muestran los pasos para poder ejecutar el chatbot en local:
+
+Primero tenemos que acceder al siguiente
+[enlace](https://huggingface.co/meta-llama/Llama-2-7b-chat-hf) de _HuggingFace_ dandonos de alta en caso de no tener una cuenta creada.
+
+A continuación tenemos que aceptar los términos y condiciones del modelo y rellanar el modelo que aparece abajo de `LLAMA 2 COMMUNITY LICENSE AGREEMENT`.
+
+Tendremos que esperar a que nos acepten la solicitud (no suelen tardar mucho) y después de esto tendremos que irnos a la sección de `Access Tokens` para generar un token de acceso. Este token es necesario para poder acceder al modelo y ejecutarlo en local.
+
+```bash
+huggingface-cli login
+```
+
+Después entraremos a una _shell_ de _Huggingface_ donde deberemos importar el token de acceso que hemos generado anteriormente. Por último ejecutaremos el siguiente código de _streamlit_ para poder interactuar con el chatbot:
+
+```
+streamlit run app.py
+```
+
+> [!WARNING]
+> La consulta puede durar bastante tiempo, en torno a **15-20 minutos** dependiendo de los recursos de tu ordenador
