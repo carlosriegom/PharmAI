@@ -1,9 +1,7 @@
 # wrangler.py
-
-# Este script se encarga de procesar archivos TXT que contienen información sobre medicamentos.
-# Extrae secciones relevantes, limpia el texto y guarda los resultados en formato JSON.
-# El script permite procesar un solo archivo o varios archivos a la vez, y maneja errores de lectura y escritura.
-# Además, incluye funcionalidades para limpiar caracteres especiales y formatear fechas.
+"""
+Este script se encarga de procesar archivos TXT que contienen información sobre medicamentos. Extrae secciones relevantes, limpia el texto y guarda los resultados en formato JSON. El script permite procesar un solo archivo o varios archivos a la vez, y maneja errores de lectura y escritura. Además, incluye funcionalidades para limpiar caracteres especiales y formatear fechas.
+"""
 
 # Librerías
 import re
@@ -18,7 +16,6 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-
 # Función para guardar los datos en un archivo JSON
 def guardar_json(data: dict, output_path: str) -> None:
     """Guarda los datos en un archivo JSON en la ruta especificada."""
@@ -30,7 +27,6 @@ def guardar_json(data: dict, output_path: str) -> None:
     except (OSError, IOError) as e:
         logging.exception("Error guardando JSON")
         raise RuntimeError(f"Error guardando JSON: {str(e)}") from e
-
 
 # Función para limpiar el diccionario
 def limpiar_diccionario(data: dict) -> dict:
@@ -171,7 +167,6 @@ def limpiar_diccionario(data: dict) -> dict:
             data[seccion] = contenido
 
     return data
-
 
 # Función para extraer las secciones relevantes de un archivo TXT, exportar a JSON y guardar
 def extract_secciones(file_path: str) -> dict:
@@ -335,7 +330,6 @@ def extract_secciones(file_path: str) -> dict:
 
     return limpiar_diccionario(data)
 
-
 # Función principal para procesar archivos
 def procesar_archivos(input_path: str, output_path: str, n: int = 0) -> dict:
     """Procesa uno o varios archivos TXT y genera los JSON correspondientes.
@@ -423,17 +417,20 @@ def procesar_archivos(input_path: str, output_path: str, n: int = 0) -> dict:
 
     return resultados
 
-
-# Ejecución principal
-if __name__ == "__main__":
+# Función principal
+def main():
+    """
+    Función principal que orquesta el proceso de parseo y limpieza de los txt.
+    """
+        
     # Ruta donde lee los outputs (ficheros .txt) del proceso ETL anterior
     input_path = os.path.join(
-        "..", "..", "data", "outputs", "1_data_acquisition", "crawler"
+        "data", "outputs", "1_data_acquisition", "crawler"
     )
     # Ruta donde guarda los outputs (ficheros .json) del proceso ETL
     # El output será el archivo 'medicamentos.json', conteniendo todos los ficheros procesados y estructurados
     output_path = os.path.join(
-        "..", "..", "data", "outputs", "1_data_acquisition", "wrangler"
+        "data", "outputs", "1_data_acquisition", "wrangler"
     )
 
     # Solicitar al usuario el número de archivos a procesar
@@ -456,3 +453,7 @@ if __name__ == "__main__":
         procesar_archivos(input_path, output_path, n)
     except Exception as e:
         logging.error(f"ERROR: Fallo en el procesamiento - {str(e)}")
+
+# Ejecución principal
+if __name__ == "__main__":
+    main()
