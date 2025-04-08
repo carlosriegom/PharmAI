@@ -33,7 +33,7 @@ Para la adquisición de los datos, se ha utilizado un scraper que obtiene la inf
 En esta parte hacemos una consulta a la API de medicamentos de la AEMPS para extraer información de todos los medicamentos autorizados (número de registro, nombre, principios activos y ficha técnica en PDF), procesa los resultados paginados eliminando duplicados y genera un fichero _csv_ con los registros más recientes ordenados por número de registro. Para ejectutar el spider, se utiliza el siguiente comando:
 
 ```bash
-python blablabla.py
+python ./src/1_data_acquisition/spider.py
 ```
 
 Este fichero csv se llama `medicamentos.csv`, guardado en la carpeta `data/outputs/1_data_acquisition/spider` y contiene la siguiente información:
@@ -52,7 +52,7 @@ Este fichero csv se llama `medicamentos.csv`, guardado en la carpeta `data/outpu
 En esta parte lo que hacemos es leer el fichero `medicamentos.csv` y para cada medicamento, descargamos la ficha técnica en PDF y estos se guardan en la carpeta `data/outputs/1_data_acquisition/fetcher` con el siguiente formato: `Nombre_Medicamento.pdf`. Para ejectutar el spider, se utiliza el siguiente comando:
 
 ```bash
-python blablabla.py
+python ./src/1_data_acquisition/fetcher.py
 ```
 
 > [!NOTE]
@@ -65,7 +65,7 @@ python blablabla.py
 En esta parte extraemos la información de cada uno de los PDFs descargados en la parte anterior del _fetcher_ y obtenermos ficheros en formato _txt_ para cada uno de los PDFs. Estos ficheros se guardan en la carpeta `data/outputs/1_data_acquisition/crawler` con el siguiente formato: `Nombre_Medicamento.txt`. Para ejectutar el _crawler_, se utiliza el siguiente comando:
 
 ```bash
-python blablabla.py
+python ./src/1_data_acquisition/crawler.py
 ```
 
 <br>
@@ -75,7 +75,7 @@ python blablabla.py
 En esta parte se procesan los ficehros _txt_ que contienen la información de la ficha técnica de los medicamentos, extrayendo secciones relevantes como indicaciones, posología, contraindicaciones, entre otras. Además se aplican técnicas de limpieza al texto, como la eliminación de caracteres especiales, normalización de espacios y fechas, ... Al final se organizan todos los datos de los medicamentos en un formato estructurado _json_. Los resultados se guardan en la carpeta `data/outputs/1_data_acquisition/wrangler` y el fichero con el resultado final se llama `medicamentos.json`. Para ejectutar el _wrangler_, se utiliza el siguiente comando:
 
 ```bash
-python blablabla.py
+python ./src/1_data_acquisition/wrangler.py
 ```
 
 > [!NOTE]
