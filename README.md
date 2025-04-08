@@ -401,7 +401,7 @@ Después de realizar este procedimiento, lo que tenemos es el 'contexto' de la p
 
 Finalmente, lo que hacemos es pasar a un modelo de lenguaje preentrenado, en este caso el modelo `LLama2 Chat 7b` de _Meta_, el contexto que hemos obtenido y la pregunta del usuario. Este modelo es capaz de generar respuestas coherentes y relevantes basadas en el contexto proporcionado. Por lo tanto, el modelo generará una respuesta a la pregunta del usuario utilizando el contexto que le hemos proporcionado. A continuación se muestra un ejemplo de pregunta y respuesta generada por el modelo:
 
-![Chatbot](images/chatbot/chatbot_ibuprofeno_efectos_conducir.jpg)
+![Chatbot](images/chatbot/chatbot_ibuprofeno_efectos_conducir2.jpg)
 
 A continuación se muestran los pasos para poder ejecutar el chatbot en local:
 
