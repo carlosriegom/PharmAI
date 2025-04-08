@@ -108,7 +108,7 @@ def load_json(file_path):
     return data
 
 ##-------FUNCIONES PARA CHATBOT------------------------------------------------------------##
-def load_llama_model(token):
+def load_llama_model():
     # Detectar el dispositivo disponible: CUDA, MPS (para Mac con Apple Silicon) o CPU
     if torch.cuda.is_available():
         device = "cuda"
@@ -123,18 +123,13 @@ def load_llama_model(token):
     model_name = "meta-llama/Llama-2-7b-chat-hf"
     
     # Cargar el tokenizador incluyendo el token de autenticación
-    tokenizer = AutoTokenizer.from_pretrained(
-        model_name,
-        use_fast=False,
-        token=token  # Se utiliza el token cargado desde el entorno
-    )
+    tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False)
 
-    # Cargar el modelo, especificando el tipo de datos y usando device_map="auto"
+    # Cargar el modelo, especificando el tipo de datos y usando device_map="auto" para aprovechar la GPU
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
-        device_map="auto",
         torch_dtype=torch.float16 if device in ["cuda", "mps"] else torch.float32,
-        token=token  # Se utiliza el token para autenticar la descarga
+        device_map="auto",
     )
 
     return model, tokenizer
@@ -207,7 +202,7 @@ def retrieve_relevant_fragments(query, embedding_model, fragments, index, k=7):
 
     return results
 
-def format_context(retrieved_fragments, max_fragments=5, max_text_length=2000):
+def format_context(retrieved_fragments, max_fragments=10, max_text_length=2000):
     """
     Formatea los fragmentos recuperados en un contexto para el modelo. Transforma una lista de diccionarios en un texto estructurado.
 
@@ -366,12 +361,12 @@ def answer_query(query, model, tokenizer):
     index = faiss.read_index("./data/outputs/5_chatbot/faiss_index_all-MiniLM-L6-v2.bin") # old
 
     # 3. Busca los fragmentos relevantes
-    retrieved_fragments = retrieve_relevant_fragments_prueba(query, embedding_model, fragments, index, k=5)
-    #retrieved_fragments = retrieve_relevant_fragments(query, embedding_model, fragments, index, k=10)
+    #retrieved_fragments = retrieve_relevant_fragments_prueba(query, embedding_model, fragments, index, k=5)
+    retrieved_fragments = retrieve_relevant_fragments(query, embedding_model, fragments, index, k=10)
 
     # 4. Aplicamos formateo al contexto
     print(f"Fragmentos recuperados: {retrieved_fragments}")
-    context = format_context(retrieved_fragments)
+    context = format_context(retrieved_fragments, max_fragments=10, max_text_length=2000)
 
     # 5. Generamos la respuesta del modelo
     print(f"Contexto: {context}")

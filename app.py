@@ -1,40 +1,19 @@
-import asyncio
-
-# Asegurarse de que haya un loop activo
-
-
-# ========================
-# 📦 Librerías externas
-# ========================
 import streamlit as st
 import os
 import sys
 import json
 import numpy as np
 import torch
+import sys
+import os
+from sentence_transformers import SentenceTransformer
 import seaborn as sns
 import faiss
+from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, GPT2Tokenizer, GPT2LMHeadModel
 import matplotlib.pyplot as plt
-from sentence_transformers import SentenceTransformer
-from transformers import (
-    AutoTokenizer,
-    AutoModelForCausalLM,
-    BitsAndBytesConfig,
-    GPT2Tokenizer,
-    GPT2LMHeadModel,
-)
-from dotenv import load_dotenv
-import huggingface_hub
 
-# ========================
-# ⚙️ Configuración del entorno
-# ========================
-load_dotenv()  # Cargar variables del archivo .env
-token = os.getenv("HUGGINGFACE_TOKEN")
-
-# ========================
-# 📁 Importar funciones personalizadas
-# ========================
+# Funciones chatbot
+# Agrega la ruta del directorio donde están las funciones del chatbot
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "src")))
 from utils import *
 
@@ -60,14 +39,8 @@ if query:
     with st.chat_message("user"):
         st.markdown(query)
 
-    # 1. Cargar modelo
-    @st.cache_resource
-    def load_model_and_tokenizer(token):
-        from utils import load_llama_model
-        return load_llama_model(token)
-
-    # Luego, en lugar de llamar a load_llama_model directamente:
-    model, tokenizer = load_model_and_tokenizer(token)
+    # 1. Cargar modelo 
+    model, tokenizer = load_llama_model()
 
     # 2. Generar respuesta
     respuesta = answer_query(query, model, tokenizer)
