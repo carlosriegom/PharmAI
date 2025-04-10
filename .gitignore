@@ -1,3 +1,5 @@
 data/
 token_huggingface.txt
-token_huggingface_PRS.txt
+token_huggingface_PRS.txt 
+__pycache__/
+.pytest_cache/
