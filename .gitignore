@@ -2,4 +2,6 @@ data/
 token_huggingface.txt
 token_huggingface_PRS.txt 
 __pycache__/
-.pytest_cache/
+.pytest_cache/data/outputs/5_chatbot/*.npy
+data/outputs/5_chatbot/*.json
+data/outputs/5_chatbot/*.bin
