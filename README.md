@@ -1,5 +1,11 @@
 # **PharmAI**
 
+<div align="justify">
+
+**PharmAI** es un proyecto integral de Machine Learning que automatiza la clasificación y análisis de medicamentos utilizando datos de la AEMPS. Desde la extracción de fichas técnicas mediante *web scraping* hasta la creación de un chatbot especializado, el sistema procesa textos médicos para estructurar información clave (indicaciones, contraindicaciones, etc.), clasifica medicamentos por grupo anatómico-terapéutico (usando códigos ATC) con modelos como *Random Forest* (97% de precisión), y genera insights mediante análisis exploratorio y visualizaciones. El chatbot, impulsado por *Llama2* y bases de datos vectoriales, permite consultas contextuales sobre efectos, interacciones y uso de medicamentos, combinando técnicas de NLP y Deep Learning para ofrecer respuestas precisas basadas en evidencia farmacéutica. 
+
+</div>
+
 ### **Tabla de contenidos**
 
 - [**1. Requisitos**](#1-requisitos) <br>
@@ -28,11 +34,15 @@ Este proyecto es end-to-end y está dividido en varias partes:
 
 ### **2.1 Adquisición de los datos**
 
+<div align="justify">
+
 Para la adquisición de los datos, se ha utilizado un scraper que obtiene la información de los medicamentos desde la página web de la [AEMPS (Agencia Española de Medicamentos y Productos Sanitarios)](https://cima.aemps.es/cima/publico/lista.html). El procedimiento es el siguiente:
 
 #### **1. Spider 🕷️**
 
 En esta parte hacemos una consulta a la API de medicamentos de la AEMPS para extraer información de todos los medicamentos autorizados (número de registro, nombre, principios activos y ficha técnica en PDF), procesa los resultados paginados eliminando duplicados y genera un fichero _csv_ con los registros más recientes ordenados por número de registro. Para ejectutar el spider, se utiliza el siguiente comando:
+
+</div>
 
 ```bash
 python ./src/1_data_acquisition/spider.py
@@ -51,11 +61,15 @@ Este fichero csv se llama `medicamentos.csv`, guardado en la carpeta `data/outpu
 
 #### **2. Fetcher ⬇️​**
 
+<div align="justify">
+
 En esta parte lo que hacemos es leer el fichero `medicamentos.csv` y para cada medicamento, descargamos la ficha técnica en PDF y estos se guardan en la carpeta `data/outputs/1_data_acquisition/fetcher` con el siguiente formato: `Nombre_Medicamento.pdf`. Para ejectutar el spider, se utiliza el siguiente comando:
 
 ```bash
 python ./src/1_data_acquisition/fetcher.py
 ```
+
+</div>
 
 > [!NOTE]
 > Para ver el contenido que aparece en una ficha técnica haz click [aquí](https://cima.aemps.es/cima/pdfs/ft/99122002/FT_99122002.pdf).
@@ -64,24 +78,32 @@ python ./src/1_data_acquisition/fetcher.py
 
 #### **3. Crawler ⛏️**
 
+<div align="justify">
+
 En esta parte extraemos la información de cada uno de los PDFs descargados en la parte anterior del _fetcher_ y obtenermos ficheros en formato _txt_ para cada uno de los PDFs. Estos ficheros se guardan en la carpeta `data/outputs/1_data_acquisition/crawler` con el siguiente formato: `Nombre_Medicamento.txt`. Para ejectutar el _crawler_, se utiliza el siguiente comando:
 
 ```bash
 python ./src/1_data_acquisition/crawler.py
 ```
 
+</div>
+
 <br>
 
 #### **4. Wrangler 📄**
 
-En esta parte se procesan los ficehros _txt_ que contienen la información de la ficha técnica de los medicamentos, extrayendo secciones relevantes como indicaciones, posología, contraindicaciones, entre otras. Además se aplican técnicas de limpieza al texto, como la eliminación de caracteres especiales, normalización de espacios y fechas, ... Al final se organizan todos los datos de los medicamentos en un formato estructurado _json_. Los resultados se guardan en la carpeta `data/outputs/1_data_acquisition/wrangler` y el fichero con el resultado final se llama `medicamentos.json`. Para ejectutar el _wrangler_, se utiliza el siguiente comando:
+<div align="justify">
+
+En esta parte se procesan los ficheros _txt_ que contienen la información de la ficha técnica de los medicamentos, extrayendo secciones relevantes como indicaciones, posología, contraindicaciones, entre otras. Además se aplican técnicas de limpieza al texto, como la eliminación de caracteres especiales, normalización de espacios y fechas, etc. Al final se organizan todos los datos de los medicamentos en un formato estructurado _json_. Los resultados se guardan en la carpeta `data/outputs/1_data_acquisition/wrangler` y el fichero con el resultado final se llama `medicamentos.json`. Para ejectutar el _wrangler_, se utiliza el siguiente comando:
 
 ```bash
 python ./src/1_data_acquisition/wrangler.py
 ```
 
+</div>
+
 > [!NOTE]
-> La estrucuta que va a tener el _json_ para cada uno de los medicamentos es la siguiente:
+> La estructuta que va a tener el _json_ para cada uno de los medicamentos es la siguiente:
 >
 > ```json
 >   "nombre_medicamento_1": {
@@ -110,6 +132,8 @@ python ./src/1_data_acquisition/wrangler.py
 
 ### **2.2 Preprocesamiento de datos**
 
+<div align="justify">
+
 Como hemos visto en la sección anterior, para cada uno de los medicamentos obtenemos una sección llamada _ATC_ que contiene el código _ATC_ del medicamento. Los códigos _ATC_ (_Anatomical Therapeutic Chemical_) son un sistema de clasificación para medicamentos que agrupa fármacos según el órgano o sistema sobre el que actúan, así como sus propiedades terapéuticas, farmacológicas y químicas. Se utilizan para estandarizar la clasificación de los medicamentos a nivel internacional, facilitando la investigación, el análisis de tendencias de prescripción y la farmacovigilancia.
 
 Por ello nos parece importante tener también esta información en el _json_ de salida. Investigando un poco encontramos un repositorio con el cual podemos obtener todos los distintos niveles del código _ATC_ y su descripción ([repositorio de códigos ATC](https://github.com/sarrabenyahia/webscrap_health_monitoring.git)). En este econtramos un fichero _csv_ que contiene la información de los códigos _ATC_ y su descripción. Este fichero lo vamos a guardar en la ruta `data/inputs/2_data_preprocessing/Tabla_ATC.csv`.
@@ -127,9 +151,11 @@ El problema que encontramos es que esta información está en inglés. Para obte
 | **ATC code_L4** | Código del nivel 4 del sistema ATC. Formato: `X00XX`                                                                           |
 | **name_L4**     | Describe el subgrupo químico o farmacológico (por ejemplo, "agentes profilácticos").                                           |
 | **ATC code_L5** | Código del nivel 5 del sistema ATC. Formato: `X00X00`                                                                          |
-| **name_L5**     | Indica la sustancia química específica (por ejemplo, "fluoruro de sodio").                                                     |
+| **name_L5**     | Indica el principio activo (por ejemplo, "Lorazepam").                                                                         |
 
 Por último, una vez conseguida esta información, la unimos al `medicamentos.json` obtenido en la salida de la parte anterior del wrangler y lo guardamos en la ruta `data/outputs/2_data_preprocessing/fichas_tecnicas_mapped_atc.json`.
+
+</div>
 
 > [!NOTE]
 > Finalmente, el fichero _json_ de salida tiene la siguiente estructura:
@@ -173,7 +199,10 @@ Por último, una vez conseguida esta información, la unimos al `medicamentos.js
 
 ### **2.3 Análisis exploratorio de datos (_EDA_)**
 
-Una vez obtenida toda la información de los medicamentos de manera estructurada y limpia, procedemos a realizar un análisis exploratorio de los datos (_EDA_) para obtener información relevante sobre los medicamentos. En esta parte se generan diferentes visualizaciones y gráficos, como wordclouds, para analizar la información de los medicamenos. A continuación se presentan algunas de las visualizaciones generadas:
+<div align="justify">
+
+Tras recopilar y organizar la información de los medicamentos, se dispone de un corpus extenso, con aproximadamente 100 millones de palabras. Por otro lado, se realiza un análisis exploratorio con el fin de identificar patrones y extraer conocimiento útil del contenido textual. Esta etapa incluye la creación de distintas visualizaciones, como wordclouds, que ayudan a representar de forma gráfica los términos más relevantes y frecuentes en los textos. A continuación, se muestran algunas de las visualizaciones generadas.
+
 
 #### **Distribución de medicamentos según el grupo anatómico (nivel 1 código ATC)**
 
@@ -188,7 +217,7 @@ Esto quizás nos ponga problemas a la hora de clasificar, ya que el modelo puede
 
 ![Wordcloud Global](images/wordclouds/wordcloud_global.png)
 
-Estas son las palabras que más aparecen en todo el corpus obtenido de las fichas técnicas con más de 100 millones de palabras, aunque se han aplicado la técnica de _stopwords_ (mostradas en el fichero `assets/spanish_stopwords.txt`) donde eliminamos las palabras más comunes usadas en la lengua española, como preposiciones, conjunciones, etc. Como era de esperar, la mayoría de palabras que aparecen se pueden asociar al campo médico y farmacéutico, como por ejemplo: `riesgo`, `mg` (de dosis), `insuficiencia renal`, ...
+Estas son las palabras que más aparecen en todo el corpus obtenido de las fichas técnicas con más de 100 millones de palabras, aunque se han aplicado la técnica de _stopwords_ (mostradas en el fichero `assets/spanish_stopwords.txt`) donde eliminamos las palabras más comunes usadas en la lengua española, como preposiciones, conjunciones, etc. Como era de esperar, la mayoría de palabras que aparecen se pueden asociar al campo médico y farmacéutico, como por ejemplo: `riesgo`, `mg` (de dosis), `insuficiencia renal`, etc.
 
 A continuación se muestran algunos wordclouds obtenidos para los distintos grupos anatómicos (nivel 1 código _ATC_):
 
@@ -269,12 +298,16 @@ Este diagrama compara los 15 términos más relevantes según dos métodos de ve
 
 Además, vemos que hay palabras que destacan en ambas técnicas, lo cual quiere decir que son las palabras más importantes en el ámbito médico y farmacéutico. Por ejemplo: `cyp`, `kg`, `inhibidores`, `exposición`, etc. Estas palabras son relevantes tanto en términos de frecuencia absoluta como en su peso relativo al corpus.
 
+</div>
+
 > [!TIP]
 > La palabra `cyp` es la más relevante en ambas técnicas. Esta se refiere a las enzimas del citocromo P450, que son esenciales para el metabolismo de muchos medicamentos. Estas enzimas intervienen en la biotransformación de fármacos, influyendo en su eficacia, seguridad y posibles interacciones. Por ello, es normal aparezca con alta frecuencia en textos relacionados con medicamentos en ambas técnicas de vectorización.
 
 #### **Correlación de Pearson entre las longitudes de los textos por sección**
 
 ![Correlación entre las longitudes de los textos por sección](images/correlacion_longitudes_texto_pearson.png)
+
+<div align="justify">
 
 Este _heatmap_ muestra la correlación entre las longitudes de los textos de diferentes secciones de las fichas técnicas de los medicamentos, es decir, medimos la relación lineal entre las longitudes de los textos de dos secciones. En nuestro caso, como hemos definido en el fichero _json_ de salida, tenemos las siguientes secciones: `indicaciones`, `posología`, `contraindicaciones`, `advertencias`, `interacciones`, `fertilidad_embarazo`, `efectos_conducir`, `reacciones_adversas`, `sobredosis`, `Propiedades_farmacocineticas`, `excipientes`, `incompatibilidades` y `precauciones_conservacion`.
 
@@ -300,8 +333,8 @@ En esta sección se han desarrollado dos modelos de clasificación para predecir
 
 Los resultados obtenidos para la regresión logística son los siguientes:
 
-- **Train accuracy**: $0.98$
-- **Test accuracy**: $0.93$
+- **Train accuracy**: $0.99$
+- **Test accuracy**: $0.95$
 
 A continuación se muestra la matriz de confusión obtenida para el modelo:
 
@@ -328,7 +361,7 @@ Y por último mostramos alguna métrica de evaluación del modelo para cada una 
 
 ![Métricas RL](images/classification/metrics_test_RF.png)
 
-Como en el modelo anterior, obtenmos muy buenos valores de _accuracy_ tanto en el _train_ como en el _test_, pero ahora los conseguimos mejorar teniendo un valor de $1.0$ y $0.97$ respectivamente. Esto indica que el modelo de _Random Forest_ es capaz de clasificar mejor algunos modelos que la regresión logística no podía clasificar correctamente. Aunque de nuevo vemos que la clase `productos antiparasitarios, insecticidas y repelentes` tiene un _F1-score_ bajo. Por lo tanto, para poder conseguir aumentar este valor sería conveniente hacer un _undersampling_ de las clases que tienen más datos o un _over sampling_ de la clase que tiene menos datos, pero esto lo dejamos como trabajo futuro.
+Como en el modelo anterior, obtenemos muy buenos valores de _accuracy_ tanto en el _train_ como en el _test_, pero ahora los conseguimos mejorar teniendo un valor de $1.0$ y $0.97$ respectivamente. Esto indica que el modelo de _Random Forest_ es capaz de clasificar mejor algunos modelos que la regresión logística no podía clasificar correctamente. Aunque de nuevo vemos que la clase `productos antiparasitarios, insecticidas y repelentes` tiene un _F1-score_ bajo. Por lo tanto, para poder conseguir aumentar este valor sería conveniente hacer un _undersampling_ de las clases que tienen más datos o un _over sampling_ de la clase que tiene menos datos, pero esto lo dejamos como trabajo futuro.
 
 #### _Feature Importance_
 
@@ -343,9 +376,9 @@ En cambio, para el modelo de _Random Forest_ no es posible obtener la palabras c
 
 #### **Predicción de nivel anatómico**
 
-En la última parte del notebook, tras haber ejecutado todas la celdas anteriores, tenemos un ejercicio donde podemos elgegir cualquier medicamento de los 20.000 que hay y hacer una predicción de la clase del nivel anatómico al que pertenece.
+En la última parte del notebook, tras haber ejecutado todas la celdas anteriores, tenemos un ejercicio donde podemos elegir cualquier medicamento de los 20.000 que hay y hacer una predicción de la clase del nivel anatómico al que pertenece.
 
-El procedimiento es el siguiente: solicitamos al usuario que introduzca el índice de un medicamento. Despues, se extrae el texto completo de la del medicamento, y por ende, de la ficha técnica del medicamento seleccionado (columna `texto_completo`) y se transforma a su representación numérica mediante el vectorizador TF-IDF previamente entrenado. Esto convierte el texto en un vector que los modelos pueden procesar. Y por último, se predice la probabilidad de pertenecer a cada clase.
+El procedimiento es el siguiente: solicitamos al usuario que introduzca el índice de un medicamento. Despues, se extrae el texto completo del medicamento, y por ende, de la ficha técnica del medicamento seleccionado (columna `texto_completo`) y se transforma a su representación numérica mediante el vectorizador TF-IDF previamente entrenado. Esto convierte el texto en un vector que los modelos pueden procesar. Y por último, se predice la probabilidad de pertenecer a cada clase.
 
 ---
 
@@ -354,6 +387,8 @@ El procedimiento es el siguiente: solicitamos al usuario que introduzca el índi
 Por último, hemos intentado recrear un chatbot que pueda responder a preguntas sobre los medicamentos. Para ello hemos realizado el siguiente procedimiento.
 
 Primero debemos reestructurar el fichero _json_ para facilitar la búsqueda de información en la base de datos vectorial que generaremos después. Ahora en vez de tener un diccionario para cada medicamento con todas las secciones correspondientes, tenemos un diccionario para cada sección de cada medicamento.
+
+</div>
 
 > [!NOTE]
 > Ahora la estructura del _json_ es la siguiente:
@@ -375,6 +410,8 @@ Primero debemos reestructurar el fichero _json_ para facilitar la búsqueda de i
 >     ...
 > ]
 > ```
+
+<div align="justify">
 
 Continuaremos generando _embeddings_ para cada uno de los textos de las secciones de los medicamentos. Para ello utilizamos el modelo `all-MiniLM-L6-v2` de _Sentence Transformers_. Estos capturan la semántica del texto permitiendo realizar búsquedas por significado en lugar de solo coincidencias de palabras. Esto es útil para responder preguntas complejas o encontrar información relacionada en el corpus de medicamentos.
 
@@ -421,6 +458,7 @@ Después entraremos a una _shell_ de _Huggingface_ donde deberemos importar el t
 ```
 streamlit run app.py
 ```
+</div>
 
 > [!WARNING]
 > La consulta puede durar bastante tiempo, en torno a **15-20 minutos** dependiendo de los recursos de tu ordenador
