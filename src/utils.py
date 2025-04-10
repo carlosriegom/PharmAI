@@ -108,6 +108,8 @@ def load_json(file_path):
     return data
 
 ##-------FUNCIONES PARA CHATBOT------------------------------------------------------------##
+
+# Función para cargar el modelo LLaMA y el tokenizador
 def load_llama_model():
     # Detectar el dispositivo disponible: CUDA, MPS (para Mac con Apple Silicon) o CPU
     if torch.cuda.is_available():
@@ -134,7 +136,8 @@ def load_llama_model():
 
     return model, tokenizer
 
-def retrieve_relevant_fragments_prueba(query, model, fragments, index, k=5):
+# [PRUEBA]: Función para buscar fragmentos relevantes para el modelo (RAG)
+def retrieve_relevant_fragments_prueba(query, model, fragments, index, k=10):
     """
     Recupera los fragmentos más relevantes para la consulta utilizando un modelo de similitud (ej. FAISS).
 
@@ -171,7 +174,8 @@ def retrieve_relevant_fragments_prueba(query, model, fragments, index, k=5):
     ]
     return retrieved_fragments
 
-def retrieve_relevant_fragments(query, embedding_model, fragments, index, k=7):
+# Función para buscar fragmentos relevantes para el modelo (RAG)
+def retrieve_relevant_fragments(query, embedding_model, fragments, index, k=10):
     """
     Realiza una búsqueda en FAISS para encontrar los fragmentos más similares a la consulta.
 
@@ -202,6 +206,7 @@ def retrieve_relevant_fragments(query, embedding_model, fragments, index, k=7):
 
     return results
 
+# Función para formatear el contexto para el modelo
 def format_context(retrieved_fragments, max_fragments=10, max_text_length=2000):
     """
     Formatea los fragmentos recuperados en un contexto para el modelo. Transforma una lista de diccionarios en un texto estructurado.
@@ -242,6 +247,7 @@ def format_context(retrieved_fragments, max_fragments=10, max_text_length=2000):
 
     return context
 
+# Función para construir el prompt para el modelo
 def build_prompt(context, query):
     """
     Construye el prompt para el modelo con base en el contexto y la consulta,
@@ -288,6 +294,7 @@ def build_prompt(context, query):
     Respuesta:"""
     return prompt
 
+# Función para generar la respuesta del modelo
 def generate_answer(query, context, tokenizer, model):
     """
     Genera una respuesta basada en los fragmentos recuperados usando LLaMA.
@@ -341,6 +348,7 @@ def generate_answer(query, context, tokenizer, model):
 
     return response
 
+# Función para responder a la consulta del usuario
 def answer_query(query, model, tokenizer):
     """
     Realiza una consulta y genera una respuesta utilizando el modelo.
@@ -358,7 +366,7 @@ def answer_query(query, model, tokenizer):
     # 2. Recuperamos los fragmentos relevantes para la consulta
     embedding_model = SentenceTransformer("all-MiniLM-L6-v2") # old
     fragments = load_json("./data/outputs/5_chatbot/contexto_medicamentos_chatbot.json") 
-    index = faiss.read_index("./data/outputs/5_chatbot/faiss_index_all-MiniLM-L6-v2.bin") # old
+    index = faiss.read_index("./data/outputs/5_chatbot/faiss_index_IndexFlatL2.bin") # old
 
     # 3. Busca los fragmentos relevantes
     #retrieved_fragments = retrieve_relevant_fragments_prueba(query, embedding_model, fragments, index, k=5)

@@ -24,7 +24,7 @@ def convertir_pdf_a_txt(ruta_pdf, ruta_txt):
         texto = extract_text(ruta_pdf)
         with open(ruta_txt, "w", encoding="utf-8") as archivo:
             archivo.write(texto)
-        print(f"Texto guardado en: {ruta_txt}")
+        #print(f"Texto guardado en: {ruta_txt}")
     except Exception as e:
         print(f"Error procesando {ruta_pdf}: {e}")
 

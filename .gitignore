@@ -1,3 +1,5 @@
-data
+data/outputs/1_data_acquisition/
+data/outputs/2_data_preprocessing/
+data/outputs/3_eda/
 token_huggingface.txt
 token_huggingface_PRS.txt
