@@ -2,7 +2,7 @@
 
 <div align="justify">
 
-**PharmAI** es un proyecto integral de Machine Learning que automatiza la clasificación y análisis de medicamentos utilizando datos de la AEMPS. Desde la extracción de fichas técnicas mediante *web scraping* hasta la creación de un chatbot especializado, el sistema procesa textos médicos para estructurar información clave (indicaciones, contraindicaciones, etc.), clasifica medicamentos por grupo anatómico-terapéutico (usando códigos ATC) con modelos como *Random Forest* (97% de precisión), y genera insights mediante análisis exploratorio y visualizaciones. El chatbot, impulsado por *Llama2* y bases de datos vectoriales, permite consultas contextuales sobre efectos, interacciones y uso de medicamentos, combinando técnicas de NLP y Deep Learning para ofrecer respuestas precisas basadas en evidencia farmacéutica. 
+**PharmAI** es un proyecto integral de Machine Learning que automatiza la clasificación y análisis de medicamentos utilizando datos de la AEMPS. Desde la extracción de fichas técnicas mediante _web scraping_ hasta la creación de un chatbot especializado, el sistema procesa textos médicos para estructurar información clave (indicaciones, contraindicaciones, etc.), clasifica medicamentos por grupo anatómico-terapéutico (usando códigos ATC) con modelos como _Random Forest_ (97% de precisión), y genera insights mediante análisis exploratorio y visualizaciones. El chatbot, impulsado por _Llama2_ y bases de datos vectoriales, permite consultas contextuales sobre efectos, interacciones y uso de medicamentos, combinando técnicas de NLP y Deep Learning para ofrecer respuestas precisas basadas en evidencia farmacéutica.
 
 </div>
 
@@ -203,7 +203,6 @@ Por último, una vez conseguida esta información, la unimos al `medicamentos.js
 
 Tras recopilar y organizar la información de los medicamentos, se dispone de un corpus extenso, con aproximadamente 100 millones de palabras. Por otro lado, se realiza un análisis exploratorio con el fin de identificar patrones y extraer conocimiento útil del contenido textual. Esta etapa incluye la creación de distintas visualizaciones, como wordclouds, que ayudan a representar de forma gráfica los términos más relevantes y frecuentes en los textos. A continuación, se muestran algunas de las visualizaciones generadas.
 
-
 #### **Distribución de medicamentos según el grupo anatómico (nivel 1 código ATC)**
 
 ![Distribución de medicamentos según el el grupo anatómico](images/distribucion_grupos_anatomicos.png)
@@ -305,7 +304,7 @@ Además, vemos que hay palabras que destacan en ambas técnicas, lo cual quiere 
 
 #### **Correlación de Pearson entre las longitudes de los textos por sección**
 
-![Correlación entre las longitudes de los textos por sección](images/correlacion_longitudes_texto_pearson.png)
+![Correlación entre las longitudes de los textos por sección](images/correlation_plots/correlacion_longitudes_texto_pearson.png)
 
 <div align="justify">
 
@@ -317,7 +316,7 @@ Como podemos ver tenemos alta correlación lineal entre la extensión del texto 
 
 #### **Correlación de Spearman entre las longitudes de los textos por sección**
 
-![Correlación entre las longitudes de los textos por sección](images/correlacion_spearman_longitudes_texto.png)
+![Correlación entre las longitudes de los textos por sección](images/correlation_plots/correlacion_spearman_longitudes_texto.png)
 
 Ahora mostramos la correlación entre las longitudes de los textos de las diferentes secciones utilizando el coeficiente de correlación de _Spearman_. A diferencia de _Pearson_, _Spearman_ mide la relación monótona entre variables basándose en los rangos de los valores, en lugar de sus valores absolutos. Esto hace que los _outliers_ tengan menos impacto en el resultado. Por lo tanto, es más robusto ante la presencia de valores atípicos.
 
@@ -458,6 +457,7 @@ Después entraremos a una _shell_ de _Huggingface_ donde deberemos importar el t
 ```
 streamlit run app.py
 ```
+
 </div>
 
 > [!WARNING]
