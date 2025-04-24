@@ -1,19 +1,15 @@
 # utils.py
 
 # Librerías
-import streamlit as st
 import os
-import sys
 import json
-import numpy as np
 import torch
-import sys
 import os
 from sentence_transformers import SentenceTransformer
-import seaborn as sns
 import faiss
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, GPT2Tokenizer, GPT2LMHeadModel
-import matplotlib.pyplot as plt
+import tiktoken
+from optimum.neural_compressor import PostTrainingQuantConfig, INCQuantizer
+from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, GPT2TokenizerFast, GPT2LMHeadModel
 
 ##-------FUNCIONES GENERALES---------------------------------------------------------------##
 
@@ -49,6 +45,7 @@ def load_json_dict(file_path):
     
     return data
 
+
 # Función para guardar un diccionario en un archivo JSON
 def save_dict_to_json(dictionary, filename):
     """
@@ -74,7 +71,8 @@ def save_dict_to_json(dictionary, filename):
         raise ValueError(f"Error al serializar el diccionario a JSON: {e}")
     except IOError as e:
         raise IOError(f"Error al escribir el archivo JSON: {e}")
-    
+
+
 # Función para cargar un json como lista de diccionarios
 def load_json(file_path):
     """
@@ -107,7 +105,110 @@ def load_json(file_path):
     
     return data
 
+
 ##-------FUNCIONES PARA CHATBOT------------------------------------------------------------##
+
+# Función para seleccionar el dispositivo (CPU, CUDA o MPS)
+def _select_device():
+    """Determina el dispositivo disponible."""
+    if torch.cuda.is_available():
+        return "cuda"
+    if torch.backends.mps.is_available():
+        return "mps"
+    return "cpu"
+
+
+# Función para contar tokens en un texto (MODELO GPT-2)
+def num_tokens_gpt2(texto: str) -> int:
+    """
+    Cuenta el número de tokens usando el tokenizador GPT-2 de tiktoken.
+    """
+    encoding = tiktoken.get_encoding("gpt2")
+    num_tokens = len(encoding.encode(texto))
+    print(f"Número de tokens que entran al modelo GPT-2: {num_tokens}")
+
+
+# Función para generar la respuesta del modelo
+def generate_answer(query: str, context: str, model, tokenizer, model_name = "llama2"):
+    """
+    Genera una respuesta usando GPT-2 o Llama2 según model_name.
+
+    Parámetros:
+    - query: la consulta del usuario.
+    - context: texto con fragmentos recuperados.
+    - model_name: "gpt2" o "llama2".
+
+    Retorna:
+    - str: la respuesta generada.
+    """
+
+    # Construir el prompt según el modelo
+    if model_name == "gpt2":
+        prompt = build_prompt(context, query, model_name)
+        num_tokens_gpt2(prompt) # obtener el número de tokens
+        inputs = tokenizer(
+            prompt,
+            return_tensors="pt",
+            truncation=True,
+            max_length=1024
+        )
+    else:  # llama2-chat
+        prompt = build_prompt(context, query)
+        inputs = tokenizer(
+            prompt,
+            return_tensors="pt"
+        )
+
+    # Seleccionar dispositivo
+    if torch.cuda.is_available():
+        device = "cuda"
+    elif torch.backends.mps.is_available():
+        device = "mps"
+    else:
+        device = "cpu"
+
+    print("Usando dispositivo:", device)
+
+    # Mover modelo y tensores
+    model.to(device)
+    inputs = {k: v.to(device) for k, v in inputs.items()}
+
+    if model_name == "gpt2":
+       # Búsqueda con beams (más determinista y coherente)
+        output_ids = model.generate(
+            **inputs,
+            max_new_tokens=500,
+            do_sample=False,
+            num_beams=5,
+            early_stopping=True,
+            pad_token_id=tokenizer.eos_token_id,
+        )
+
+    elif model_name == "llama2":
+        # Generación de texto
+        with torch.no_grad():
+            output_ids = model.generate(
+                **inputs,
+                max_new_tokens=2000,
+                do_sample=True,
+                temperature=0.1,
+                top_p=0.9,
+                repetition_penalty=1.2,
+            )
+
+    # Decodificar y extraer solo la respuesta
+    #full_text = tokenizer.decode(output_ids[0], skip_special_tokens=True)
+    #response = full_text[len(prompt):].strip()
+
+    # número de tokens de entrada
+    input_len = inputs["input_ids"].shape[-1]
+
+    # descartamos los tokens del prompt
+    gen_tokens = output_ids[0][input_len:]
+    response = tokenizer.decode(gen_tokens, skip_special_tokens=True).strip()
+
+    return response
+
 
 # Función para cargar el modelo LLaMA y el tokenizador
 def load_llama_model():
@@ -135,6 +236,23 @@ def load_llama_model():
     )
 
     return model, tokenizer
+
+
+# Función para cargar el modelo GPT-2
+def load_gpt2_model(model_name="gpt2-medium"):
+    device = "mps" if torch.backends.mps.is_available() else "cpu"
+    print("Usando dispositivo:", device)
+
+    tokenizer = GPT2Tokenizer.from_pretrained(model_name)
+    model = GPT2LMHeadModel.from_pretrained(model_name)
+
+    # GPT‑2 no tiene *pad* por defecto ⇒ usa el EOS
+    tokenizer.pad_token = tokenizer.eos_token
+    model.config.pad_token_id = tokenizer.eos_token_id
+
+    model.to(device)
+    return model, tokenizer
+
 
 # [PRUEBA]: Función para buscar fragmentos relevantes para el modelo (RAG)
 def retrieve_relevant_fragments_prueba(query, model, fragments, index, k=10):
@@ -174,8 +292,9 @@ def retrieve_relevant_fragments_prueba(query, model, fragments, index, k=10):
     ]
     return retrieved_fragments
 
+
 # Función para buscar fragmentos relevantes para el modelo (RAG)
-def retrieve_relevant_fragments(query, embedding_model, fragments, index, k=10):
+def retrieve_relevant_fragments(query, embedding_model, fragments, index, model_name):
     """
     Realiza una búsqueda en FAISS para encontrar los fragmentos más similares a la consulta.
 
@@ -186,6 +305,11 @@ def retrieve_relevant_fragments(query, embedding_model, fragments, index, k=10):
     Retorna:
     - Lista de fragmentos de texto relevantes.
     """
+
+    if model_name == "llama2":
+        k = 10
+    elif model_name == "gpt2":
+        k = 3
     
     # Convertir la consulta en embedding
     query_embedding = embedding_model.encode(query, convert_to_numpy=True).reshape(1, -1)
@@ -205,6 +329,7 @@ def retrieve_relevant_fragments(query, embedding_model, fragments, index, k=10):
             )
 
     return results
+
 
 # Función para formatear el contexto para el modelo
 def format_context(retrieved_fragments, max_fragments=10, max_text_length=2000):
@@ -247,8 +372,9 @@ def format_context(retrieved_fragments, max_fragments=10, max_text_length=2000):
 
     return context
 
+
 # Función para construir el prompt para el modelo
-def build_prompt(context, query):
+def build_prompt(context, query, model_name="llama2"):
     """
     Construye el prompt para el modelo con base en el contexto y la consulta,
     incluyendo un ejemplo de cómo debe formatear la respuesta.
@@ -260,96 +386,123 @@ def build_prompt(context, query):
     Retorna:
     - str: Prompt completo para el modelo
     """
-    prompt = f"""
-    
-    1. OBJETIVO GENERAL:
-    Eres un asistente médico especializado en información sobre medicamentos. Debes responder a la pregunta del usuario basándote únicamente en la información proporcionada. No debes inventar ni suponer información adicional.
+    if model_name == "llama2":
+        prompt = f"""
+        
+        1. OBJETIVO GENERAL:
+        Eres un asistente médico especializado en información sobre medicamentos. Debes responder a la pregunta del usuario basándote únicamente en la información proporcionada. No debes inventar ni suponer información adicional.
 
-    2. FORMATO DEL CONTEXTO:
-    El contexto se presenta como un texto con varios fragmentos que contiene información de uno o varios medicamentos presentes en la pregunta del ususario, donde cada fragmento tiene el siguiente formato:
-    - Medicamento: Nombre del medicamento
-    - Categoría: Categoría de la información (ej. efectos secundarios, interacciones)
-    - Información: Texto relevante sobre el medicamento, el cual debes analizar antes de responder.
+        2. FORMATO DEL CONTEXTO:
+        El contexto se presenta como un texto con varios fragmentos que contiene información de uno o varios medicamentos presentes en la pregunta del ususario, donde cada fragmento tiene el siguiente formato:
+        - Medicamento: Nombre del medicamento
+        - Categoría: Categoría de la información (ej. efectos secundarios, interacciones)
+        - Información: Texto relevante sobre el medicamento, el cual debes analizar antes de responder.
 
-    3. FORMATO DE RESPUESTA:
-    - Debes responder de manera clara y precisa a la pregunta formulada por el usuario, utilizando ÚNICAMENTE el contexto que se te está proporcionando. 
-    - No debes inventar información ni suponer datos que no estén presentes en el contexto.
-    - Si la información proporcionada no es suficiente para responder completamente, dilo e indica qué datos faltan.
-    - Incluye una mención explícita a los textos que respaldan tu respuesta, indicando para todos ellos el medicamento y la categoría.
-    - Si la pregunta no está relacionada con medicamentos, indica que no puedes ayudar en ese caso.
+        3. FORMATO DE RESPUESTA:
+        - Debes responder de manera clara y precisa a la pregunta formulada por el usuario, utilizando ÚNICAMENTE el contexto que se te está proporcionando. 
+        - No debes inventar información ni suponer datos que no estén presentes en el contexto.
+        - Si la información proporcionada no es suficiente para responder completamente, dilo e indica qué datos faltan.
+        - Incluye una mención explícita a los textos que respaldan tu respuesta, indicando para todos ellos el medicamento, la categoría y el enlace de la ficha técnica de los medicamentos correspondientes.
+        - Si la pregunta no está relacionada con medicamentos, indica que no puedes ayudar en ese caso.
 
-    4. EJEMPLO DE CONSULTA Y DE RESPUESTA ESPERADA:
-    Pregunta: ¿Cuáles son los efectos secundarios de la aspirina?
-    Contexto:
-        "medicamento": "Aspirina"
-        "categoria": "efectos_secundarios"
-        "texto": "Puede causar náuseas y dolor de estómago."
-    Respuesta:
-    La aspirina puede causar efectos secundarios como náuseas y dolor de estómago (extraído de la ficha técnica, de la sección "efectos_secundarios" del medicamento "ASPIRINA": "la aspirina tiene como efectos secundarios, entre ottros, la aparición de náuseas y dolor de tripa"). Si necesitas más detalles, por favor consulta la ficha técnica completa.
+        4. EJEMPLO DE CONSULTA Y DE RESPUESTA ESPERADA:
+        Pregunta: ¿Cuáles son los efectos secundarios de la aspirina?
+        Contexto:
+            "medicamento": "Aspirina"
+            "categoria": "efectos_secundarios"
+            "texto": "Puede causar náuseas y dolor de estómago."
+        Respuesta:
+        La aspirina puede causar efectos secundarios como náuseas y dolor de estómago (extraído de la ficha técnica, de la sección "efectos_secundarios" del medicamento "ASPIRINA": "la aspirina tiene como efectos secundarios, entre ottros, la aparición de náuseas y dolor de tripa"). Si necesitas más detalles, por favor consulta la ficha técnica completa.
 
-    5. INSTRUCCIONES FINALES:
-    Básandote ÚNICAMENTE en la información proporcionada en ({context}), responde a la siguiente pregunta:
-    {query}
+        5. INSTRUCCIONES FINALES:
+        Básandote ÚNICAMENTE en la información proporcionada en ({context}), responde a la siguiente pregunta:
+        {query}
 
-    Respuesta:"""
+        Respuesta:"""
+
+    elif model_name == "gpt2":
+        prompt = f"""
+        INSTRUCCIÓN:
+        Eres un asistente médico especializado en información sobre medicamentos. Debes responder a la pregunta del usuario basándote únicamente en el contexto proporcionado. 
+
+        EJEMPLO:
+        Pregunta: ¿Cuáles son los efectos secundarios de la aspirina?
+        Respuesta: La aspirina puede causar náuseas y dolor de estómago.
+
+        Contexto:
+        {context}
+
+        Pregunta: {query}
+        Respuesta a la pregunta:"""
+        
     return prompt
 
+
 # Función para generar la respuesta del modelo
-def generate_answer(query, context, tokenizer, model):
+def load_model_and_tokenizer(model_name: str):
     """
-    Genera una respuesta basada en los fragmentos recuperados usando LLaMA.
-
-    Parámetros:
-    - query (str): La consulta del usuario
-    - context (string): Texto formateado con los fragmentos recuperados 
-    - tokenizer: Tokenizador del modelo
-    - model: Modelo generativo
-
-    Retorna:
-    - str: Respuesta generada
+    Carga el modelo y el tokenizador apropiado según model_name.
     """
 
-    # Construimos el prompt para el modelo
-    prompt = build_prompt(context, query)
+    # Detectar dispositivo
+    device = _select_device()
+    
+    if model_name == "gpt2":
+        ''' 
+        Nombre | Parámetros aproximados | Comentario
+        gpt2 | 124 M | “GPT-2 small”, el valor por defecto
+        gpt2-medium | 350 M | Intermedio
+        gpt2-large| 774 M | Grande
+        gpt2-xl | 1 500 M | Extra-large
+        distilgpt2 | 82 M | Versión destilada, más ligera
+        '''
+        # En dispositivos MPS, evitar cargas grandes sin cuantización
+        model_name_gpt2 = "gpt2-large"
+        if device == "mps" and model_name_gpt2 in ("gpt2-large", "gpt2-xl"):
+            # --- Cuantización dinámica INT8 con Optimum ---
+            # 1) Definimos la configuración de cuantización
+            quant_config = PostTrainingQuantConfig(approach="dynamic")
+            # 2) Creamos el quantizador a partir del modelo Hugging Face
+            quantizer = INCQuantizer.from_pretrained(
+                model_name_gpt2,
+                quantization_config=quant_config
+            )
+            # 3) Cargamos el modelo base en FP32
+            base_model = GPT2LMHeadModel.from_pretrained(model_name_gpt2)
+            # 4) Aplicamos cuantización dinámica INT8
+            model = quantizer.quantize(model=base_model)
+            # 5) Movemos el modelo cuantizado a MPS
+            model.to(device)
+        else:
+            tokenizer = GPT2TokenizerFast.from_pretrained(model_name_gpt2)
+            model = GPT2LMHeadModel.from_pretrained(model_name_gpt2)
 
-    # Tokenizamos el prompt
-    input_ids = tokenizer.encode(prompt, return_tensors="pt")
+        # Aseguramos un token de pad
+        tokenizer.pad_token = tokenizer.eos_token
+        model.config.pad_token_id = tokenizer.eos_token_id
+        
 
-    # Detectar el dispositivo disponible: CUDA, MPS (para Mac con Apple Silicon) o CPU
-    if torch.cuda.is_available():
-        device = "cuda"
-    elif torch.backends.mps.is_available():
-        device = "mps"
-    else:
-        device = "cpu"
-
-    print("Usando dispositivo:", device)
-
-    input_ids = input_ids.to(device)
-
-    # Generamos la respuesta usando el modelo
-    with torch.no_grad():
-        output_ids = model.generate(
-            input_ids,
-            max_length=len(input_ids[0]) + 2000,  # Limita la longitud de salida
-            do_sample=True,
-            temperature=0.1,
-            top_p=0.9,
-            repetition_penalty=1.2,
+    elif model_name == "llama2":
+        # Llama2-chat usa SentencePiece; trust_remote_code para cargar implementaciones custom
+        tokenizer = AutoTokenizer.from_pretrained(
+            "meta-llama/Llama-2-7b-chat-hf",
+            use_fast=False
+        )
+        model = AutoModelForCausalLM.from_pretrained(
+            "meta-llama/Llama-2-7b-chat-hf",
+            torch_dtype=torch.float16,
+            device_map="auto",
+            trust_remote_code=True
         )
 
-    # Decodificamos la respuesta generada
-    response = tokenizer.decode(output_ids[0], skip_special_tokens=True)
+    else:
+        raise ValueError(f"Modelo desconocido: {model_name}")
 
-    # Extraemos solo la parte de la respuesta después del prompt
-    response = response[
-        len(prompt) :
-    ].strip()  # Ajuste para capturar la respuesta correctamente
+    return tokenizer, model
 
-    return response
 
 # Función para responder a la consulta del usuario
-def answer_query(query, model, tokenizer):
+def answer_query(query, model_name="llama2"):
     """
     Realiza una consulta y genera una respuesta utilizando el modelo.
 
@@ -370,14 +523,19 @@ def answer_query(query, model, tokenizer):
 
     # 3. Busca los fragmentos relevantes
     #retrieved_fragments = retrieve_relevant_fragments_prueba(query, embedding_model, fragments, index, k=5)
-    retrieved_fragments = retrieve_relevant_fragments(query, embedding_model, fragments, index, k=10)
+    retrieved_fragments = retrieve_relevant_fragments(query, embedding_model, fragments, index, model_name)
 
     # 4. Aplicamos formateo al contexto
     print(f"Fragmentos recuperados: {retrieved_fragments}")
     context = format_context(retrieved_fragments, max_fragments=10, max_text_length=2000)
 
-    # 5. Generamos la respuesta del modelo
+    # 5. Cargar el modelo y el tokenizador
+    tokenizer, model = load_model_and_tokenizer(model_name)
+
+    # 6. Generamos la respuesta del modelo en base al prompt y el contexto
     print(f"Contexto: {context}")
-    response = generate_answer(query, context, tokenizer, model)
+    response = generate_answer(query, context, model, tokenizer, model_name)
 
     return response
+
+
