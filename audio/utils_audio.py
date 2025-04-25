@@ -6,6 +6,19 @@ import librosa
 import tempfile
 import io
 from TTS.api import TTS
+import numpy as np
+import librosa
+import os
+import librosa.display
+from scipy.signal import butter, filtfilt
+import librosa.display
+import matplotlib.pyplot as plt
+from IPython.display import Audio, display
+try:
+    import noisereduce as nr
+    _HAS_NOISEREDUCE = True
+except ImportError:
+    _HAS_NOISEREDUCE = False
 
 # pip install streamlit-webrtc openai-whisper librosa soundfile tt
 
