@@ -15,6 +15,7 @@
   - [**2.3 Análisis exploratorio de datos (EDA)**](#23-análisis-exploratorio-de-datos-eda)
   - [**2.4 Machine Learning: clasificación de medicamentos**](#24-machine-learning-clasificación-de-medicamentos)
   - [**2.5 Deep Learning: chatbot**](#25-deep-learning-chatbot)
+  - [**2.6 Implementación de pipeline completo de audio**](#26-implementación-de-pipeline-completo-de-audio)
 
 ## **1. Requisitos**
 
@@ -462,3 +463,66 @@ streamlit run app.py
 
 > [!WARNING]
 > La consulta puede durar bastante tiempo, en torno a **15-20 minutos** dependiendo de los recursos de tu ordenador
+
+---
+
+**2.6 Implementación de pipeline completo de audio**
+
+<div align="justify">
+
+En esta sección presentamos un flujo *end-to-end* para convertir las grabaciones en vectores numéricos aptos para entrenamiento. Primero aseguramos una **limpieza y normalización** homogénea de todas las señales; después extraemos un conjunto de **features acústicas** que capturan información espectral y temporal relevante. Finalmente, utilizaremos estas representaciones para entrenar un clasificador binario que distinga entre audios de **“efectos adversos”** y **“otros”**.
+
+---
+
+#### **2.6.1 Preprocesado del audio**
+
+Antes de la extracción de features, cada fichero de audio pasa por las siguientes etapas:
+
+1. **Carga y resampleado**  
+   Se convierte a mono y se ajusta a una tasa de muestreo fija (por ejemplo, 16 kHz) para asegurar uniformidad.
+
+2. **Reducción de ruido y recorte de silencio**  
+   Eliminamos componentes de baja energía y ruido de fondo mediante técnicas de *spectral gating* y recorte de segmentos silenciosos con un umbral en dB.
+
+3. **Pre-énfasis**  
+   Se aplica un filtro FIR que realza las frecuencias altas para mejorar la detección de formantes vocales.
+
+4. **Filtrado pasa-banda**  
+   Se conserva únicamente la banda vocal (300–3400 Hz) usando un filtro Butterworth de cuarto orden.
+
+5. **Normalización RMS**  
+   Ajustamos el nivel de energía de la señal para que todas las muestras tengan la misma potencia (por ejemplo, RMS = 0.1).
+
+</div>
+
+> [!NOTE]
+> Este pipeline está encapsulado en una única función del módulo `utils_audio.py`, lo que permite su uso directo sobre cualquier archivo `.wav`
+
+#### **2.6.2 Extracción de features acústicas**
+
+<div align="justify">
+
+Con la señal ya preprocesada (`y`, `sr`), extraemos un conjunto de descriptores que capturan distintos aspectos de la información espectral y temporal:
+
+- **MFCC (Mel-Frequency Cepstral Coefficients)**  
+  Representan la envolvente espectral en una escala mel, muy útiles para modelar la percepción humana del sonido.
+
+- **Chroma STFT**  
+  Indica la intensidad de cada semitono (12 bins) a lo largo del tiempo, capturando la huella armónica.
+
+- **Spectral Contrast**  
+  Mide la diferencia entre picos y valles en distintas bandas de frecuencia, resaltando componentes resonantes.
+
+- **Tonnetz**  
+  Un mapa tonal que representa relaciones armónicas basadas en la transformada de Chakrabarti.
+
+- **Zero-Crossing Rate (ZCR)**  
+  Tasa de cambios de signo de la onda, asociada a la “aspereza” o ruido de la señal.
+
+- **Spectral Centroid & Roll-off**  
+  Indicadores de brillo y ancho de banda activo de la señal.
+
+</div>
+
+> [!NOTE]
+> Al igual que el preprocesado, la extracción de features se encapsula en una función del módulo `utils_audio.py`, lo que permite su uso directo sobre cualquier archivo `.wav`

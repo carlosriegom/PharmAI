@@ -256,38 +256,45 @@ def reduce_noise(y: np.ndarray, sr: int, prop_decrease: float = 1.0) -> np.ndarr
     return nr.reduce_noise(y=y, sr=sr, prop_decrease=prop_decrease)
 
 
-def plot_waveform(y: np.ndarray, sr: int, title: str):
-    """
-    Grafica la forma de onda (waveform) de la señal de audio.
+def _ensure_dir(dir_path):
+    if dir_path:
+        os.makedirs(dir_path, exist_ok=True)
 
-    Parámetros:
-    - y: señal de audio (1D numpy array).
-    - sr: frecuencia de muestreo.
-    - title: título para el gráfico.
-    """
+
+def plot_waveform(y, sr, title=None, save_dir=None, filename=None, show=False):
     plt.figure(figsize=(10, 4))
     librosa.display.waveshow(y, sr=sr)
-    plt.title(title)
+    if title:
+        plt.title(title)
     plt.xlabel("Tiempo (s)")
     plt.ylabel("Amplitud")
-    plt.show()
+
+    if save_dir and filename:
+        path = os.path.join(save_dir, filename)
+        plt.savefig(path)
+    if show:
+        plt.show()
+    else:
+        plt.close()
 
 
-def plot_spectrogram(y: np.ndarray, sr: int, title: str):
-    """
-    Grafica el espectrograma (espectrograma logarítmico).
-
-    Parámetros:
-    - y: señal de audio (1D numpy array).
-    - sr: frecuencia de muestreo.
-    - title: título para el gráfico.
-    """
+def plot_spectrogram(y, sr, title=None, save_dir=None, filename=None, show=False):
     plt.figure(figsize=(10, 4))
-    D = librosa.amplitude_to_db(librosa.stft(y), ref=np.max)
-    librosa.display.specshow(D, sr=sr, x_axis="time", y_axis="log")
-    plt.title(title)
+    D = librosa.amplitude_to_db(np.abs(librosa.stft(y)), ref=np.max)
+    librosa.display.specshow(D, sr=sr, x_axis="time", y_axis="hz")
+    if title:
+        plt.title(title)
     plt.colorbar(format="%+2.0f dB")
-    plt.show()
+    plt.xlabel("Tiempo (s)")
+    plt.ylabel("Frecuencia (Hz)")
+
+    if save_dir and filename:
+        path = os.path.join(save_dir, filename)
+        plt.savefig(path)
+    if show:
+        plt.show()
+    else:
+        plt.close()
 
 
 def preprocess_audio(
@@ -299,151 +306,317 @@ def preprocess_audio(
     pre_coef: float = 0.97,
     rms_target: float = 0.1,
     reduce_noise_flag: bool = False,
+    plot: bool = False,
+    show: bool = False,
+    save_dir: str = None,
 ) -> np.ndarray:
     """
     Pipeline completo de preprocesado de audio:
-    1) Carga y conversión a mono.
-    2) (Opcional) Reducción de ruido.
-    3) Recorte de silencio inicial y final.
-    4) Pre-énfasis.
-    5) Filtro pasa-banda para voz.
-    6) Normalización por RMS.
+    - plot: si True genera las figuras.
+    - show: si True llama a plt.show() para mostrarlas.
+    - save_dir: carpeta donde guardar los PNG (si None no guarda).
 
-    Parámetros:
-    - path: ruta al archivo de audio.
-    - sr: frecuencia de muestreo deseada.
-    - trim_db: umbral dB para recorte de silencio.
-    - lowcut, highcut: límites de frecuencia para filtrado.
-    - pre_coef: coeficiente de pre-énfasis.
-    - rms_target: RMS objetivo para normalización.
-    - reduce_noise_flag: activar reducción de ruido.
-
-    Retorna:
-    - Señal procesada lista para extracción de features.
+    Al final imprime la ruta de cada fichero guardado y la carpeta base.
     """
+    # Crear carpeta si hace falta
+    if save_dir:
+        os.makedirs(save_dir, exist_ok=True)
 
     # 1) Carga
     y, _ = librosa.load(path, sr=sr, mono=True)
+    if plot:
+        fn_w, fn_s = "01_original_waveform.png", "01_original_spectrogram.png"
+        plot_waveform(
+            y, sr, title="Original", show=show, save_dir=save_dir, filename=fn_w
+        )
+        if save_dir:
+            print(f"[✔] Guardado waveform original en: {os.path.join(save_dir, fn_w)}")
+        plot_spectrogram(
+            y, sr, title="Original", show=show, save_dir=save_dir, filename=fn_s
+        )
+        if save_dir:
+            print(
+                f"[✔] Guardado spectrogram original en: {os.path.join(save_dir, fn_s)}"
+            )
 
-    # 2) Reducción de ruido si se solicita
+    # 2) Reducción de ruido
     if reduce_noise_flag:
         y = reduce_noise(y, sr)
+        if plot:
+            fn_w, fn_s = "02_denoised_waveform.png", "02_denoised_spectrogram.png"
+            plot_waveform(
+                y,
+                sr,
+                title="Después de denoise",
+                show=show,
+                save_dir=save_dir,
+                filename=fn_w,
+            )
+            if save_dir:
+                print(
+                    f"[✔] Guardado waveform denoised en: {os.path.join(save_dir, fn_w)}"
+                )
+            plot_spectrogram(
+                y,
+                sr,
+                title="Después de denoise",
+                show=show,
+                save_dir=save_dir,
+                filename=fn_s,
+            )
+            if save_dir:
+                print(
+                    f"[✔] Guardado spectrogram denoised en: {os.path.join(save_dir, fn_s)}"
+                )
 
     # 3) Recorte de silencio
     y, _ = librosa.effects.trim(y, top_db=trim_db)
+    if plot:
+        fn_w, fn_s = "03_trim_waveform.png", "03_trim_spectrogram.png"
+        plot_waveform(
+            y, sr, title="Después de trim", show=show, save_dir=save_dir, filename=fn_w
+        )
+        if save_dir:
+            print(f"[✔] Guardado waveform trim en: {os.path.join(save_dir, fn_w)}")
+        plot_spectrogram(
+            y, sr, title="Después de trim", show=show, save_dir=save_dir, filename=fn_s
+        )
+        if save_dir:
+            print(f"[✔] Guardado spectrogram trim en: {os.path.join(save_dir, fn_s)}")
 
     # 4) Pre-énfasis
     y = pre_emphasis(y, coef=pre_coef)
+    if plot:
+        fn_w, fn_s = "04_preemphasis_waveform.png", "04_preemphasis_spectrogram.png"
+        plot_waveform(
+            y,
+            sr,
+            title="Después de pre-énfasis",
+            show=show,
+            save_dir=save_dir,
+            filename=fn_w,
+        )
+        if save_dir:
+            print(
+                f"[✔] Guardado waveform pre-énfasis en: {os.path.join(save_dir, fn_w)}"
+            )
+        plot_spectrogram(
+            y,
+            sr,
+            title="Después de pre-énfasis",
+            show=show,
+            save_dir=save_dir,
+            filename=fn_s,
+        )
+        if save_dir:
+            print(
+                f"[✔] Guardado spectrogram pre-énfasis en: {os.path.join(save_dir, fn_s)}"
+            )
 
     # 5) Filtrado pasa-banda
     y = bandpass_filter(y, sr, lowcut, highcut)
+    if plot:
+        fn_w, fn_s = "05_bandpass_waveform.png", "05_bandpass_spectrogram.png"
+        plot_waveform(
+            y,
+            sr,
+            title="Después de bandpass",
+            show=show,
+            save_dir=save_dir,
+            filename=fn_w,
+        )
+        if save_dir:
+            print(f"[✔] Guardado waveform bandpass en: {os.path.join(save_dir, fn_w)}")
+        plot_spectrogram(
+            y,
+            sr,
+            title="Después de bandpass",
+            show=show,
+            save_dir=save_dir,
+            filename=fn_s,
+        )
+        if save_dir:
+            print(
+                f"[✔] Guardado spectrogram bandpass en: {os.path.join(save_dir, fn_s)}"
+            )
 
     # 6) Normalización RMS
     y = normalize_rms(y, target_rms=rms_target)
+    if plot:
+        fn_w, fn_s = "06_rms_waveform.png", "06_rms_spectrogram.png"
+        plot_waveform(
+            y, sr, title="Después de RMS", show=show, save_dir=save_dir, filename=fn_w
+        )
+        if save_dir:
+            print(f"[✔] Guardado waveform RMS en: {os.path.join(save_dir, fn_w)}")
+        plot_spectrogram(
+            y, sr, title="Después de RMS", show=show, save_dir=save_dir, filename=fn_s
+        )
+        if save_dir:
+            print(f"[✔] Guardado spectrogram RMS en: {os.path.join(save_dir, fn_s)}")
+
+    # Informe final
+    if plot and save_dir:
+        print(f"\nTodas las imágenes se han guardado en: {save_dir}\n")
 
     return y
 
 
-def extract_mfcc(y, sr, n_mfcc=13, plot=False):
+def extract_mfcc(
+    y: np.ndarray,
+    sr: int,
+    n_mfcc: int = 13,
+    plot: bool = False,
+    save_dir: str = None,
+    filename: str = "mfcc.png",
+) -> np.ndarray:
     """
-    Calcula MFCCs y opcionalmente los muestra.
-    Retorna: mfccs (n_mfcc × T)
+    Calcula MFCCs. Si plot=True, grafica y opcionalmente guarda.
     """
     mfccs = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=n_mfcc)
     if plot:
-        plt.figure(figsize=(10, 3))
-        librosa.display.specshow(mfccs, x_axis="time")
-        plt.ylabel("MFCC")
-        plt.colorbar()
-        plt.title("MFCCs")
+        fig, ax = plt.subplots(figsize=(10, 3))
+        img = librosa.display.specshow(mfccs, x_axis="time", ax=ax, cmap="viridis")
+        ax.set(ylabel="MFCC", title="MFCCs")
+        fig.colorbar(img, ax=ax)
         plt.tight_layout()
+        _ensure_dir(save_dir)
+        if save_dir:
+            fig.savefig(os.path.join(save_dir, filename))
         plt.show()
+        plt.close(fig)
     return mfccs
 
 
-def extract_chroma(y, sr, plot=False):
+def extract_chroma(
+    y: np.ndarray,
+    sr: int,
+    plot: bool = False,
+    save_dir: str = None,
+    filename: str = "chroma.png",
+) -> np.ndarray:
     """
-    Calcula Chroma STFT y opcionalmente lo muestra.
-    Retorna: chroma (12 × T)
+    Calcula Chroma STFT. Si plot=True, grafica y opcionalmente guarda.
     """
     chroma = librosa.feature.chroma_stft(y=y, sr=sr)
     if plot:
-        plt.figure(figsize=(10, 2))
-        librosa.display.specshow(chroma, y_axis="chroma", x_axis="time")
-        plt.title("Chroma STFT")
-        plt.colorbar()
+        fig, ax = plt.subplots(figsize=(10, 2))
+        librosa.display.specshow(chroma, y_axis="chroma", x_axis="time", ax=ax)
+        ax.set(title="Chroma STFT")
+        fig.colorbar(ax.images[0], ax=ax)
         plt.tight_layout()
+        _ensure_dir(save_dir)
+        if save_dir:
+            fig.savefig(os.path.join(save_dir, filename))
         plt.show()
+        plt.close(fig)
     return chroma
 
 
-def extract_spectral_contrast(y, sr, n_bands=6, plot=False):
+def extract_spectral_contrast(
+    y: np.ndarray,
+    sr: int,
+    n_bands: int = 6,
+    plot: bool = False,
+    save_dir: str = None,
+    filename: str = "spectral_contrast.png",
+) -> np.ndarray:
     """
-    Calcula contraste espectral y opcionalmente lo muestra.
-    Retorna: contrast (n_bands+1 × T)
+    Calcula contraste espectral. Si plot=True, grafica y opcionalmente guarda.
     """
     contrast = librosa.feature.spectral_contrast(y=y, sr=sr, n_bands=n_bands)
     if plot:
-        plt.figure(figsize=(10, 2))
-        librosa.display.specshow(contrast, x_axis="time")
-        plt.ylabel("Bandas")
-        plt.colorbar()
-        plt.title("Spectral Contrast")
+        fig, ax = plt.subplots(figsize=(10, 2))
+        librosa.display.specshow(contrast, x_axis="time", ax=ax)
+        ax.set(ylabel="Bandas", title="Spectral Contrast")
+        fig.colorbar(ax.images[0], ax=ax)
         plt.tight_layout()
+        _ensure_dir(save_dir)
+        if save_dir:
+            fig.savefig(os.path.join(save_dir, filename))
         plt.show()
+        plt.close(fig)
     return contrast
 
 
-def extract_tonnetz(y, sr, plot=False):
+def extract_tonnetz(
+    y: np.ndarray,
+    sr: int,
+    plot: bool = False,
+    save_dir: str = None,
+    filename: str = "tonnetz.png",
+) -> np.ndarray:
     """
-    Calcula Tonnetz y opcionalmente lo muestra.
-    Retorna: tonnetz (6 × T)
+    Calcula Tonnetz. Si plot=True, grafica y opcionalmente guarda.
     """
     y_harm = librosa.effects.harmonic(y)
     tonnetz = librosa.feature.tonnetz(y=y_harm, sr=sr)
     if plot:
-        plt.figure(figsize=(10, 2))
-        librosa.display.specshow(tonnetz, y_axis="tonnetz", x_axis="time")
-        plt.title("Tonnetz")
-        plt.colorbar()
+        fig, ax = plt.subplots(figsize=(10, 2))
+        librosa.display.specshow(tonnetz, y_axis="tonnetz", x_axis="time", ax=ax)
+        ax.set(title="Tonnetz")
+        fig.colorbar(ax.images[0], ax=ax)
         plt.tight_layout()
+        _ensure_dir(save_dir)
+        if save_dir:
+            fig.savefig(os.path.join(save_dir, filename))
         plt.show()
+        plt.close(fig)
     return tonnetz
 
 
-def extract_zcr(y, sr, plot=False):
+def extract_zcr(
+    y: np.ndarray,
+    sr: int,
+    plot: bool = False,
+    save_dir: str = None,
+    filename: str = "zcr.png",
+) -> np.ndarray:
     """
-    Calcula Zero-Crossing Rate (1×T). Si plot=True, dibuja un line plot.
+    Calcula Zero-Crossing Rate. Si plot=True, grafica y opcionalmente guarda.
     """
     zcr = librosa.feature.zero_crossing_rate(y)  # shape=(1, T)
     if plot:
         times = librosa.frames_to_time(np.arange(zcr.shape[1]), sr=sr)
-        plt.figure(figsize=(10, 3))
-        plt.plot(times, zcr[0], linewidth=1)
-        plt.xlabel("Tiempo (s)")
-        plt.ylabel("ZCR")
-        plt.title("Zero-Crossing Rate")
+        fig, ax = plt.subplots(figsize=(10, 3))
+        ax.plot(times, zcr[0], linewidth=1)
+        ax.set(xlabel="Tiempo (s)", ylabel="ZCR", title="Zero-Crossing Rate")
         plt.tight_layout()
+        _ensure_dir(save_dir)
+        if save_dir:
+            fig.savefig(os.path.join(save_dir, filename))
         plt.show()
+        plt.close(fig)
     return zcr
 
 
-def extract_centroid_rolloff(y, sr, plot=False):
+def extract_centroid_rolloff(
+    y: np.ndarray,
+    sr: int,
+    plot: bool = False,
+    save_dir: str = None,
+    filename: str = "centroid_rolloff.png",
+) -> tuple:
     """
-    Calcula Spectral Centroid y Roll-off (cada uno 1×T).
-    Si plot=True, dibuja ambos en un mismo line plot.
+    Calcula Spectral Centroid y Roll-off. Si plot=True, grafica y opcionalmente guarda.
     """
-    centroid = librosa.feature.spectral_centroid(y=y, sr=sr)  # (1, T)
-    rolloff = librosa.feature.spectral_rolloff(y=y, sr=sr)  # (1, T)
+    centroid = librosa.feature.spectral_centroid(y=y, sr=sr)
+    rolloff = librosa.feature.spectral_rolloff(y=y, sr=sr)
     if plot:
         times = librosa.frames_to_time(np.arange(centroid.shape[1]), sr=sr)
-        plt.figure(figsize=(10, 4))
-        plt.plot(times, centroid[0], label="Centroid", linewidth=1)
-        plt.plot(times, rolloff[0], label="Rolloff", linewidth=1)
-        plt.xlabel("Tiempo (s)")
-        plt.ylabel("Frecuencia (Hz)")
-        plt.title("Spectral Centroid & Roll-off")
-        plt.legend()
+        fig, ax = plt.subplots(figsize=(10, 4))
+        ax.plot(times, centroid[0], label="Centroid", linewidth=1)
+        ax.plot(times, rolloff[0], label="Rolloff", linewidth=1)
+        ax.set(
+            xlabel="Tiempo (s)",
+            ylabel="Frecuencia (Hz)",
+            title="Spectral Centroid & Roll-off",
+        )
+        ax.legend()
         plt.tight_layout()
+        _ensure_dir(save_dir)
+        if save_dir:
+            fig.savefig(os.path.join(save_dir, filename))
         plt.show()
+        plt.close(fig)
     return centroid, rolloff
