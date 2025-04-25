@@ -470,21 +470,22 @@ def extract_mfcc(
     save_dir: str = None,
     filename: str = "mfcc.png",
 ) -> np.ndarray:
-    """
-    Calcula MFCCs. Si plot=True, grafica y opcionalmente guarda.
-    """
     mfccs = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=n_mfcc)
+
     if plot:
         fig, ax = plt.subplots(figsize=(10, 3))
-        img = librosa.display.specshow(mfccs, x_axis="time", ax=ax, cmap="viridis")
+        img = librosa.display.specshow(mfccs, x_axis="time", ax=ax)
         ax.set(ylabel="MFCC", title="MFCCs")
         fig.colorbar(img, ax=ax)
         plt.tight_layout()
-        _ensure_dir(save_dir)
+
         if save_dir:
+            _ensure_dir(save_dir)
             fig.savefig(os.path.join(save_dir, filename))
+            print(f"[✔] Guardado MFCC en: {os.path.join(save_dir, filename)}")
         plt.show()
         plt.close(fig)
+
     return mfccs
 
 
@@ -495,21 +496,22 @@ def extract_chroma(
     save_dir: str = None,
     filename: str = "chroma.png",
 ) -> np.ndarray:
-    """
-    Calcula Chroma STFT. Si plot=True, grafica y opcionalmente guarda.
-    """
     chroma = librosa.feature.chroma_stft(y=y, sr=sr)
+
     if plot:
         fig, ax = plt.subplots(figsize=(10, 2))
-        librosa.display.specshow(chroma, y_axis="chroma", x_axis="time", ax=ax)
+        img = librosa.display.specshow(chroma, y_axis="chroma", x_axis="time", ax=ax)
         ax.set(title="Chroma STFT")
-        fig.colorbar(ax.images[0], ax=ax)
+        fig.colorbar(img, ax=ax)
         plt.tight_layout()
-        _ensure_dir(save_dir)
+
         if save_dir:
+            _ensure_dir(save_dir)
             fig.savefig(os.path.join(save_dir, filename))
+            print(f"[✔] Guardado Chroma en: {os.path.join(save_dir, filename)}")
         plt.show()
         plt.close(fig)
+
     return chroma
 
 
@@ -521,21 +523,24 @@ def extract_spectral_contrast(
     save_dir: str = None,
     filename: str = "spectral_contrast.png",
 ) -> np.ndarray:
-    """
-    Calcula contraste espectral. Si plot=True, grafica y opcionalmente guarda.
-    """
     contrast = librosa.feature.spectral_contrast(y=y, sr=sr, n_bands=n_bands)
+
     if plot:
         fig, ax = plt.subplots(figsize=(10, 2))
-        librosa.display.specshow(contrast, x_axis="time", ax=ax)
+        img = librosa.display.specshow(contrast, x_axis="time", ax=ax)
         ax.set(ylabel="Bandas", title="Spectral Contrast")
-        fig.colorbar(ax.images[0], ax=ax)
+        fig.colorbar(img, ax=ax)
         plt.tight_layout()
-        _ensure_dir(save_dir)
+
         if save_dir:
+            _ensure_dir(save_dir)
             fig.savefig(os.path.join(save_dir, filename))
+            print(
+                f"[✔] Guardado Spectral Contrast en: {os.path.join(save_dir, filename)}"
+            )
         plt.show()
         plt.close(fig)
+
     return contrast
 
 
@@ -546,22 +551,23 @@ def extract_tonnetz(
     save_dir: str = None,
     filename: str = "tonnetz.png",
 ) -> np.ndarray:
-    """
-    Calcula Tonnetz. Si plot=True, grafica y opcionalmente guarda.
-    """
     y_harm = librosa.effects.harmonic(y)
     tonnetz = librosa.feature.tonnetz(y=y_harm, sr=sr)
+
     if plot:
         fig, ax = plt.subplots(figsize=(10, 2))
-        librosa.display.specshow(tonnetz, y_axis="tonnetz", x_axis="time", ax=ax)
+        img = librosa.display.specshow(tonnetz, y_axis="tonnetz", x_axis="time", ax=ax)
         ax.set(title="Tonnetz")
-        fig.colorbar(ax.images[0], ax=ax)
+        fig.colorbar(img, ax=ax)
         plt.tight_layout()
-        _ensure_dir(save_dir)
+
         if save_dir:
+            _ensure_dir(save_dir)
             fig.savefig(os.path.join(save_dir, filename))
+            print(f"[✔] Guardado Tonnetz en: {os.path.join(save_dir, filename)}")
         plt.show()
         plt.close(fig)
+
     return tonnetz
 
 
@@ -572,21 +578,22 @@ def extract_zcr(
     save_dir: str = None,
     filename: str = "zcr.png",
 ) -> np.ndarray:
-    """
-    Calcula Zero-Crossing Rate. Si plot=True, grafica y opcionalmente guarda.
-    """
-    zcr = librosa.feature.zero_crossing_rate(y)  # shape=(1, T)
+    zcr = librosa.feature.zero_crossing_rate(y)
+
     if plot:
         times = librosa.frames_to_time(np.arange(zcr.shape[1]), sr=sr)
         fig, ax = plt.subplots(figsize=(10, 3))
         ax.plot(times, zcr[0], linewidth=1)
         ax.set(xlabel="Tiempo (s)", ylabel="ZCR", title="Zero-Crossing Rate")
         plt.tight_layout()
-        _ensure_dir(save_dir)
+
         if save_dir:
+            _ensure_dir(save_dir)
             fig.savefig(os.path.join(save_dir, filename))
+            print(f"[✔] Guardado ZCR en: {os.path.join(save_dir, filename)}")
         plt.show()
         plt.close(fig)
+
     return zcr
 
 
@@ -597,11 +604,9 @@ def extract_centroid_rolloff(
     save_dir: str = None,
     filename: str = "centroid_rolloff.png",
 ) -> tuple:
-    """
-    Calcula Spectral Centroid y Roll-off. Si plot=True, grafica y opcionalmente guarda.
-    """
     centroid = librosa.feature.spectral_centroid(y=y, sr=sr)
     rolloff = librosa.feature.spectral_rolloff(y=y, sr=sr)
+
     if plot:
         times = librosa.frames_to_time(np.arange(centroid.shape[1]), sr=sr)
         fig, ax = plt.subplots(figsize=(10, 4))
@@ -614,9 +619,14 @@ def extract_centroid_rolloff(
         )
         ax.legend()
         plt.tight_layout()
-        _ensure_dir(save_dir)
+
         if save_dir:
+            _ensure_dir(save_dir)
             fig.savefig(os.path.join(save_dir, filename))
+            print(
+                f"[✔] Guardado Centroid/Rolloff en: {os.path.join(save_dir, filename)}"
+            )
         plt.show()
         plt.close(fig)
+
     return centroid, rolloff
