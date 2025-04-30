@@ -480,7 +480,17 @@ Antes de la extracción de features, cada fichero de audio pasa por las siguient
 
 [▶️ Escuchar “Audio 9 – efectos adversos”](images/audio/preprocesado/audio_9_angel.wav)
 
-1. **Carga y resampleado**  
+<p>
+  <div align="center">
+    <img src="images/audio/preprocesado/01_original_waveform.png" alt="Audio Original - Forma de onda" width="50%" />
+    <img src="images/audio/preprocesado/01_original_spectrogram.png" alt="Audio Original - Espectrograma" width="50%" />
+  </div>
+</p>
+
+> [!NOTE]
+> Para poder escuchar cualquier audio, primero debes descargarlo y después abrirlo con un reproductor de audio.
+
+1. **Carga y resampleado**
    Se convierte a mono y se ajusta a una tasa de muestreo fija (por ejemplo, 16 kHz) para asegurar uniformidad.
 
 2. **Reducción de ruido y recorte de silencio**  

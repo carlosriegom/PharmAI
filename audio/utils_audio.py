@@ -368,21 +368,36 @@ def preprocess_audio(
                 print(
                     f"[✔] Guardado spectrogram denoised en: {os.path.join(save_dir, fn_s)}"
                 )
-
-    # 3) Recorte de silencio
-    y, _ = librosa.effects.trim(y, top_db=trim_db)
-    if plot:
-        fn_w, fn_s = "03_trim_waveform.png", "03_trim_spectrogram.png"
-        plot_waveform(
-            y, sr, title="Después de trim", show=show, save_dir=save_dir, filename=fn_w
-        )
+        
+        # Guardar el audio con reducción de ruido
         if save_dir:
-            print(f"[✔] Guardado waveform trim en: {os.path.join(save_dir, fn_w)}")
-        plot_spectrogram(
-            y, sr, title="Después de trim", show=show, save_dir=save_dir, filename=fn_s
-        )
-        if save_dir:
-            print(f"[✔] Guardado spectrogram trim en: {os.path.join(save_dir, fn_s)}")
+            base_name = os.path.splitext(os.path.basename(path))[0]
+            audio_filename = f"{base_name}_reduccion_ruido.wav"
+            audio_path = os.path.join(save_dir, audio_filename)
+            sf.write(audio_path, y, sr)
+            print(f"[✔] Guardado audio con reducción de ruido en: {audio_path}")
+            # 3) Recorte de silencio
+            y, _ = librosa.effects.trim(y, top_db=trim_db)
+            if plot:
+                fn_w, fn_s = "03_trim_waveform.png", "03_trim_spectrogram.png"
+                plot_waveform(
+                    y, sr, title="Después de trim", show=show, save_dir=save_dir, filename=fn_w
+                )
+                if save_dir:
+                    print(f"[✔] Guardado waveform trim en: {os.path.join(save_dir, fn_w)}")
+                plot_spectrogram(
+                    y, sr, title="Después de trim", show=show, save_dir=save_dir, filename=fn_s
+                )
+                if save_dir:
+                    print(f"[✔] Guardado spectrogram trim en: {os.path.join(save_dir, fn_s)}")
+            
+            # Guardar el audio con recorte de silencio
+            if save_dir:
+                base_name = os.path.splitext(os.path.basename(path))[0]
+                audio_filename = f"{base_name}_recorte_silencio.wav"
+                audio_path = os.path.join(save_dir, audio_filename)
+                sf.write(audio_path, y, sr)
+                print(f"[✔] Guardado audio con recorte de silencio en: {audio_path}")
 
     # 4) Pre-énfasis
     y = pre_emphasis(y, coef=pre_coef)
@@ -412,6 +427,14 @@ def preprocess_audio(
             print(
                 f"[✔] Guardado spectrogram pre-énfasis en: {os.path.join(save_dir, fn_s)}"
             )
+    
+    # Guardar el audio con pre-énfasis
+    if save_dir:
+        base_name = os.path.splitext(os.path.basename(path))[0]
+        audio_filename = f"{base_name}_preenfasis.wav"
+        audio_path = os.path.join(save_dir, audio_filename)
+        sf.write(audio_path, y, sr)
+        print(f"[✔] Guardado audio con pre-énfasis en: {audio_path}")
 
     # 5) Filtrado pasa-banda
     y = bandpass_filter(y, sr, lowcut, highcut)
@@ -439,6 +462,14 @@ def preprocess_audio(
             print(
                 f"[✔] Guardado spectrogram bandpass en: {os.path.join(save_dir, fn_s)}"
             )
+    
+    # Guardar el audio con filtro pasa-banda
+    if save_dir:
+        base_name = os.path.splitext(os.path.basename(path))[0]
+        audio_filename = f"{base_name}_filtro_basspand.wav"
+        audio_path = os.path.join(save_dir, audio_filename)
+        sf.write(audio_path, y, sr)
+        print(f"[✔] Guardado audio con filtro pasa-banda en: {audio_path}")
 
     # 6) Normalización RMS
     y = normalize_rms(y, target_rms=rms_target)
@@ -454,6 +485,14 @@ def preprocess_audio(
         )
         if save_dir:
             print(f"[✔] Guardado spectrogram RMS en: {os.path.join(save_dir, fn_s)}")
+    
+    # Guardar el audio con normalización RMS
+    if save_dir:
+        base_name = os.path.splitext(os.path.basename(path))[0]
+        audio_filename = f"{base_name}_normalizacion.wav"
+        audio_path = os.path.join(save_dir, audio_filename)
+        sf.write(audio_path, y, sr)
+        print(f"[✔] Guardado audio con normalización RMS en: {audio_path}")
 
     # Informe final
     if plot and save_dir:
