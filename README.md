@@ -487,8 +487,12 @@ Antes de la extracción de features, cada fichero de audio pasa por las siguient
   </div>
 </p>
 
+</div>
+
 > [!NOTE]
 > Para poder escuchar cualquier audio, primero debes descargarlo y después abrirlo con un reproductor de audio.
+
+<div align="justify">
 
 1. **Carga y resampleado**
    Se convierte a mono y se ajusta a una tasa de muestreo fija (por ejemplo, 16 kHz) para asegurar uniformidad.
