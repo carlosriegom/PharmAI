@@ -466,7 +466,7 @@ streamlit run app.py
 
 ---
 
-**2.6 Implementación de pipeline completo de audio**
+## **2.6 Implementación de pipeline completo de audio**
 
 <div align="justify">
 
@@ -478,7 +478,7 @@ En esta sección presentamos un flujo _end-to-end_ para convertir las grabacione
 
 Antes de la extracción de features, cada fichero de audio pasa por las siguientes etapas. Vamos a mostrar el proceso que sufre un audio mostrando su _waveform_ y su espectrograma para ver cómo cambia la señal a lo largo del proceso. A continuación se muestra un ejemplo de un audio que hemos preprocesado:
 
-[▶️ Escuchar “Audio 9 – efectos adversos”](audio/data/outputs/6_audios/efectos_adversos/audio_9_angel.wav)
+[▶️ Escuchar “Audio 9 – efectos adversos”](images\audio\preprocesado\audio_9_angel.wav)
 
 1. **Carga y resampleado**  
    Se convierte a mono y se ajusta a una tasa de muestreo fija (por ejemplo, 16 kHz) para asegurar uniformidad.
