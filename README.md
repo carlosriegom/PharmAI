@@ -566,22 +566,34 @@ Antes de la extracción de features, cada fichero de audio pasa por las siguient
 Con la señal ya preprocesada (`y`, `sr`), extraemos un conjunto de descriptores que capturan distintos aspectos de la información espectral y temporal:
 
 - **MFCC (Mel-Frequency Cepstral Coefficients)**  
-  Representan la envolvente espectral en una escala mel, muy útiles para modelar la percepción humana del sonido.
+  Representan la envolvente espectral en una escala mel, muy útiles para modelar la percepción humana del sonido. Sirve para modelar el timbre y las caracterícas vocales de forma compacta. Como vemos, las filas superiores (coeficientes de orden bajo) aparezcan rojas porque suelen tener magnitudes grandes al reflejar la envolvente global de la voz y las filas inferiores (coeficientes de orden alto) queden azules, al corresponder a detalles más finos y de menor amplitud. Este código de color pone de relieve precisamente cómo en la voz humana la energía principal está en los formantes bajos y los armónicos agudos aportan menos energía
+
+  ![mfcc](images/audio/feature_extraction/mfcc.png)
 
 - **Chroma STFT**  
-  Indica la intensidad de cada semitono (12 bins) a lo largo del tiempo, capturando la huella armónica.
+  Representa la energía normalizada en cada uno de los 12 semitonos a lo largo del tiempo, capturando la huella armónica de la señal. Aunque es muy usado en música para modelar progresiones y tonalidades, en voz humana nos revela la “melodía” de la prosodia. En la imagen, los valores más cercanos a 1 aparecen como los tonos más brillantes (amarillo claro), mientras que los semitonos con intensidad baja (cerca de 0) quedan en colores oscuros (púrpura o casi negro). Así, cada casilla brillante señala el semitono dominante en ese instante, reflejando cómo varía la entonación de la voz de forma muy parecida a una línea melódica.
+
+  ![chroma](images/audio/feature_extraction/chroma.png)
 
 - **Spectral Contrast**  
-  Mide la diferencia entre picos y valles en distintas bandas de frecuencia, resaltando componentes resonantes.
+  Representa la diferencia de energía entre los picos y los valles dentro de varias bandas de frecuencia a lo largo del tiempo. Aunque es muy útil en música para resaltar texturas, en la voz humana nos indica cuándo la señal es más resonante (vocales abiertas) o más uniforme (consonantes suaves). En la imagen, los valores de contraste más altos aparecen como los tonos más brillantes (amarillo claro, cerca de 80), señalando que en esa banda la energía de los formantes supera con creces los valles; los valores bajos (púrpura intenso, cerca de 0) indican bandas donde el espectro es más plano. Así, cada columna brillante marca momentos de alta resonancia y variación de la voz, mientras que las zonas oscuras corresponden a tramos con poca diferencia espectral, como fricativas o transiciones suaves. En nuestro caso vemos como una línea amarilla constante lo que denota que el habla humana mantiene de forma estable un formante fuerte.
+
+  ![spectral_contrast](images/audio/feature_extraction/spectral_contrast.png)
 
 - **Tonnetz**  
-  Un mapa tonal que representa relaciones armónicas basadas en la transformada de Chakrabarti.
+  Representa la proyección de las relaciones armónicas básicas de la señal (tercias mayores/menores y quintas) en un espacio tonal. Aunque nace del análisis musical, en voz humana revela cómo varía la “riqueza” armónica de los formantes. En la voz, cada parche rojizo en una fila concreta significa que en ese instante ese intervalo (p. ej. la quinta) está muy presente en el timbre, mientras que los azules indican que esa relación armónica es mínima. Este patrón nos ayuda a ver momentos de uniformidad tonal (vocales sostenidas) frente a transiciones donde se alteran los armónicos (cambios de fonema o entonación).
+
+  ![tonnetz](images/audio/feature_extraction/tonnetz.png)
 
 - **Zero-Crossing Rate (ZCR)**  
-  Tasa de cambios de signo de la onda, asociada a la “aspereza” o ruido de la señal.
+  Mide cuántas veces la señal de audio cruza el eje cero (cambio de signo) por ventana de tiempo, indicando rugosidad o periodicidad. En la gráfica vemos valores que oscilan entre ≈0.05 y ≈0.35, sin caer nunca a 0. Valores bajos (0.05–0.15) corresponden a segmentos más periódicos y suaves, típicos de vocales sonoras (/a/, /o/) donde la onda se comporta casi como un puro tono. Valores altos (0.2–0.35) aparecen en consonantes fricativas o transitorios ruidosos (/s/, /f/, “t” explosiva) donde la señal cruza cero con mucha más frecuencia. El hecho de que la curva nunca llegue a 0 significa que no hay tramos de silencio puro ni segmentos de señal.
+
+  ![ZCR](images/audio/feature_extraction/zcr.png)
 
 - **Spectral Centroid & Roll-off**  
-  Indicadores de brillo y ancho de banda activo de la señal.
+  Representan dos indicadores clave del “brillo” y la anchura del espectro de la señal a lo largo del tiempo. El centroide espectral (línea azul) muestra el centro de masa del espectro,es decir, la frecuencia promedio ponderada por amplitud; valores más altos indican que la voz suena más “aguda” o brillante. El roll-off (línea naranja) marca la frecuencia por debajo de la cual se acumula, por ejemplo, el 85 % de la energía total; un roll-off elevado significa un ancho de banda activo mayor, típico de sonidos ricos en armónicos altos.
+
+  ![centroid_roll_off](images/audio/feature_extraction/centroid_rolloff.png)
 
 </div>
 
