@@ -470,19 +470,21 @@ streamlit run app.py
 
 <div align="justify">
 
-En esta sección presentamos un flujo *end-to-end* para convertir las grabaciones en vectores numéricos aptos para entrenamiento. Primero aseguramos una **limpieza y normalización** homogénea de todas las señales; después extraemos un conjunto de **features acústicas** que capturan información espectral y temporal relevante. Finalmente, utilizaremos estas representaciones para entrenar un clasificador binario que distinga entre audios de **“efectos adversos”** y **“otros”**.
+En esta sección presentamos un flujo _end-to-end_ para convertir las grabaciones en vectores numéricos aptos para entrenamiento. Primero aseguramos una **limpieza y normalización** homogénea de todas las señales; después extraemos un conjunto de **features acústicas** que capturan información espectral y temporal relevante. Finalmente, utilizaremos estas representaciones para entrenar un clasificador binario que distinga entre audios de **“efectos adversos”** y **“otros”**.
 
 ---
 
 #### **2.6.1 Preprocesado del audio**
 
-Antes de la extracción de features, cada fichero de audio pasa por las siguientes etapas:
+Antes de la extracción de features, cada fichero de audio pasa por las siguientes etapas. Vamos a mostrar el proceso que sufre un audio mostrando su _waveform_ y su espectrograma para ver cómo cambia la señal a lo largo del proceso. A continuación se muestra un ejemplo de un audio que hemos preprocesado:
+
+[▶️ Escuchar “Audio 9 – efectos adversos”](audio/data/outputs/6_audios/efectos_adversos/audio_9_angel.wav)
 
 1. **Carga y resampleado**  
    Se convierte a mono y se ajusta a una tasa de muestreo fija (por ejemplo, 16 kHz) para asegurar uniformidad.
 
 2. **Reducción de ruido y recorte de silencio**  
-   Eliminamos componentes de baja energía y ruido de fondo mediante técnicas de *spectral gating* y recorte de segmentos silenciosos con un umbral en dB.
+   Eliminamos componentes de baja energía y ruido de fondo mediante técnicas de _spectral gating_ y recorte de segmentos silenciosos con un umbral en dB.
 
 3. **Pre-énfasis**  
    Se aplica un filtro FIR que realza las frecuencias altas para mejorar la detección de formantes vocales.
