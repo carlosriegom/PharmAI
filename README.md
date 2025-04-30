@@ -519,7 +519,7 @@ Antes de la extracción de features, cada fichero de audio pasa por las siguient
     </p>
 
 3. **Pre-énfasis**  
-   Se aplica un filtro FIR que realza las frecuencias altas para mejorar la detección de formantes vocales.
+   Se aplica un filtro FIR que realza las frecuencias altas para mejorar la detección de formantes vocales. En el espectrogrma vemos como zonas por encima de ~3 kHz se ven más brillantes, realzando detalles agudos que antes estaban más tenues.
 
    [▶️ Escuchar “Pre-énfasis”](images/audio/preprocesado/audio_9_angel_pre_enfasis.wav)
 
@@ -531,7 +531,7 @@ Antes de la extracción de features, cada fichero de audio pasa por las siguient
       </p>
 
 4. **Filtrado pasa-banda**  
-   Se conserva únicamente la banda vocal (300–3400 Hz) usando un filtro Butterworth de cuarto orden.
+   Se conserva únicamente la banda vocal (300–3400 Hz) usando un filtro Butterworth de cuarto orden. En el espectrograma, las bandas inferiores y superiores quedan completamente negras.
 
    [▶️ Escuchar “Filtrado pasa-banda”](images/audio/preprocesado/audio_9_angel_pasa_banda.wav)
 
