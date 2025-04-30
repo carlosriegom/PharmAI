@@ -482,8 +482,8 @@ Antes de la extracción de features, cada fichero de audio pasa por las siguient
 
 <p>
   <div align="center">
-    <img src="images/audio/preprocesado/01_original_waveform.png" alt="Audio Original - Forma de onda" width="50%" />
-    <img src="images/audio/preprocesado/01_original_spectrogram.png" alt="Audio Original - Espectrograma" width="50%" />
+    <img src="images/audio/preprocesado/01_original_waveform.png" alt="Audio Original - Forma de onda" width="49%" />
+    <img src="images/audio/preprocesado/01_original_spectrogram.png" alt="Audio Original - Espectrograma" width="49%" />
   </div>
 </p>
 
@@ -496,14 +496,59 @@ Antes de la extracción de features, cada fichero de audio pasa por las siguient
 2. **Reducción de ruido y recorte de silencio**  
    Eliminamos componentes de baja energía y ruido de fondo mediante técnicas de _spectral gating_ y recorte de segmentos silenciosos con un umbral en dB.
 
+   [▶️ Escuchar “Reducción ruido”](images/audio/preprocesado/audio_9_angel_reduccion_ruido.wav)
+
+    <p>
+      <div align="center">
+        <img src="images/audio/preprocesado/02_denoised_waveform.png" alt="Audio Original - Forma de onda" width="49%" />
+        <img src="images/audio/preprocesado/02_denoised_spectrogram.png" alt="Audio Original - Espectrograma" width="49%" />
+      </div>
+    </p>
+
+   [▶️ Escuchar “Recorte silencio”](images/audio/preprocesado/audio_9_angel_recorte_silencio.wav)
+
+    <p>
+      <div align="center">
+        <img src="images/audio/preprocesado/03_trim_waveform.png" alt="Audio Original - Forma de onda" width="49%" />
+        <img src="images/audio/preprocesado/03_trim_spectrogram.png" alt="Audio Original - Espectrograma" width="49%" />
+      </div>
+    </p>
+
 3. **Pre-énfasis**  
    Se aplica un filtro FIR que realza las frecuencias altas para mejorar la detección de formantes vocales.
+
+   [▶️ Escuchar “Pre-énfasis”](images/audio/preprocesado/audio_9_angel_pre_enfasis.wav)
+
+      <p>
+        <div align="center">
+          <img src="images/audio/preprocesado/04_preemphasis_waveform.png" alt="Audio Original - Forma de onda" width="49%" />
+          <img src="images/audio/preprocesado/04_preemphasis_spectrogram.png" alt="Audio Original - Espectrograma" width="49%" />
+        </div>
+      </p>
 
 4. **Filtrado pasa-banda**  
    Se conserva únicamente la banda vocal (300–3400 Hz) usando un filtro Butterworth de cuarto orden.
 
+   [▶️ Escuchar “Filtrado pasa-banda”](images/audio/preprocesado/audio_9_angel_pasa_banda.wav)
+
+      <p>
+        <div align="center">
+          <img src="images/audio/preprocesado/05_bandpass_waveform.png" alt="Audio Original - Forma de onda" width="49%" />
+          <img src="images/audio/preprocesado/05_bandpass_spectrogram.png" alt="Audio Original - Espectrograma" width="49%" />
+        </div>
+      </p>
+
 5. **Normalización RMS**  
    Ajustamos el nivel de energía de la señal para que todas las muestras tengan la misma potencia (por ejemplo, RMS = 0.1).
+
+   [▶️ Escuchar “Normalización RMS”](images/audio/preprocesado/audio_9_angel_normalizacion_rms.wav)
+
+      <p>
+        <div align="center">
+          <img src="images/audio/preprocesado/06_rms_waveform.png" alt="Audio Original - Forma de onda" width="49%" />
+          <img src="images/audio/preprocesado/06_rms_spectrogram.png" alt="Audio Original - Espectrograma" width="49%" />
+        </div>
+      </p>
 
 </div>
 
