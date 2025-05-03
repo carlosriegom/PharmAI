@@ -599,3 +599,46 @@ Con la señal ya preprocesada (`y`, `sr`), extraemos un conjunto de descriptores
 
 > [!NOTE]
 > Al igual que el preprocesado, la extracción de features se encapsula en una función del módulo `utils_audio.py`, lo que permite su uso directo sobre cualquier archivo `.wav`
+
+### **2.6.3 Clasificación de audio**
+
+<div align="justify">
+
+Por último, vamos a realizar una clasificación de audios por la intención del usuario. En este caso, el clasificador se entrena para distinguir entre dos clases: `efectos_adversos` y `otros`. Para cada una se han grabado 10 audios por persona obteniendo 60 audios en total entre las dos clases. Cada uno de ellos se lleva por el pipeline de preprocesado y extracción de features y después es clasificado por el modelo de _Random Forest_. Obtenemos los siguientes resultados:
+
+- **Train accuracy**: $1.0$
+- **Test accuracy**: $0.75$
+
+A continuación se muestra la matriz de confusión obtenida y algunas gráficas donde se muestra la _performance_ del modelo:
+
+![Matriz confusión 1](images/audio/clasificacion/matriz_confusion_1.png)
+
+Estos resultados muestran un claro sobreajuste: el modelo alcanza un 100 % de _accuracy_ en el train pero cae a 75 % en el test, lo que indica que ha memorizado muy bien los ejemplos de entrenamiento pero no logra generalizar con la misma eficacia a datos nuevos.
+
+![Distribucion probabilidad 1](images/audio/clasificacion/distribucion_probabilidad_1.png)
+
+![ROC 1](images/audio/clasificacion/ROC_1.png)
+
+En los histogramas de probabilidades se aprecia que para “efectos_adversos” los scores se agrupan en dos zonas: un pico en torno a 0.4 y otro más concentrado entre 0.7–1.0, mientras que para “otros” hay una acumulación en 0.0–0.2 y otras en 0.5 y 0.7-0.9. Esto indica que, si bien existen claros grupos de confianza alta para ambos casos, el solapamiento en la franja 0.7-0.9 vuelve propenso a errores de clasificación. En un escenario ideal querríamos distribuciones totalmente asimétricas, con las probabilidades de “efectos_adversos” agrupándose muy cerca de 1.0 y las de “otros” muy próximas a 0.0, de modo que el solapamiento sea mínimo y la clasificación resulte prácticamente infalible.
+
+La curva ROC, con un AUC de 0,75, confirma una capacidad discriminativa moderada: el modelo es mejor que el azar pero aún confunde un porcentaje significativo de positivos y negativos.
+
+Podemos concluir lo siguiente: el modelo alcanza un 100 % de accuracy en el train pero cae a 75 % en el test, lo que indica que ha “memorizado” muy bien los ejemplos de entrenamiento pero no logra generalizar con la misma eficacia a datos nuevos.
+
+Para intentar mejorar el rendimiento del modelo, se han aplicado técnicas de _data augmentation_ a los audios de entrenamiento, permitiendo aumentar el conjunto de datos y reducir el sobreajuste consiguiendo finalmente 300 audios por clase. Obtenemos los siguientes resultados:
+
+- **Train accuracy**: $1.0$
+- **Test accuracy**: $0.83$
+- A continuación se muestra la matriz de confusión obtenida y algunas gráficas donde se muestra la _performance_ del modelo:
+
+![Matriz confusión 2](images/audio/clasificacion/matriz_confusion_2.png)
+
+Estos resultados muestran un claro sobreajuste: el modelo alcanza un 100 % de _accuracy_ en el train pero cae a 75 % en el test, lo que indica que ha memorizado muy bien los ejemplos de entrenamiento pero no logra generalizar con la misma eficacia a datos nuevos.
+
+![Distribucion probabilidad 2](images/audio/clasificacion/distribucion_probabilidad_2.png)
+
+![ROC 2](images/audio/clasificacion/ROC_2.png)
+
+En los histogramas de probabilidades vemos que para “efectos_adversos” la mayoría de los scores se concentra en torno a 0.6–1.0, mientras que para “otros” se extiende de una forma plana entre 0.0–06. La superposición ahora es mucho menor que en el modelo básico, por lo que las dos clases quedan ahora mejor separadas, aunque todavía se siguen produciendo fallos.
+
+La curva ROC alcanza un AUC de 0,95, reflejo de una capacidad discriminativa muy alta. En conjunto, las distribuciones de probabilidad más asimétricas y el incremento del AUC muestran que la estrategia de _data augmentation_ ha fortalecido la robustez del modelo y reducido sustancialmente los errores de clasificación.
