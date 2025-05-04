@@ -642,3 +642,24 @@ Estos resultados muestran un claro sobreajuste: el modelo alcanza un 100 % de _a
 En los histogramas de probabilidades vemos que para “efectos_adversos” la mayoría de los scores se concentra en torno a 0.6–1.0, mientras que para “otros” se extiende de una forma plana entre 0.0–06. La superposición ahora es mucho menor que en el modelo básico, por lo que las dos clases quedan ahora mejor separadas, aunque todavía se siguen produciendo fallos.
 
 La curva ROC alcanza un AUC de 0,95, reflejo de una capacidad discriminativa muy alta. En conjunto, las distribuciones de probabilidad más asimétricas y el incremento del AUC muestran que la estrategia de _data augmentation_ ha fortalecido la robustez del modelo y reducido sustancialmente los errores de clasificación.
+
+### **2.6.4 Integración de audio en el chatbot**  
+
+Para enriquecer la experiencia de usuario, hemos integrado capacidades de voz en el chatbot mediante dos componentes clave:  
+
+1. **Transcripción automática de consultas** (_speech-to-text_):  
+Utilizando el modelo **Whisper** de OpenAI, convertimos las grabaciones de audio del usuario en texto para procesarlas con el modelo de lenguaje (Llama2).  
+
+2. **Respuestas habladas** (_text-to-speech_):  
+Implementamos síntesis de voz con **Tortoise-TTS** para generar respuestas auditivas, permitiendo una interacción bidireccional completamente vocal.  
+
+Esto habilita consultas como *"¿Qué efectos adversos tiene el ibuprofeno?"* grabadas directamente desde el micrófono, y respuestas generadas en texto y voz, ampliando la accesibilidad del sistema.  
+
+---
+
+### **2.6.5 Consideraciones finales**  
+Los resultados obtenidos, aunque preliminares, son satisfactorios considerando las limitaciones del conjunto de datos: **únicamente contamos con 30 muestras de audio** (de 3 personas diferentes en entornos con/sin ruido). Para lograr modelos robustos y generalizables sería necesario ampliar significativamente el volumen de datos, incluyendo más hablantes y escenarios acústicos. No obstante, este prototipo demuestra la viabilidad técnica del pipeline completo:  
+
+`audio → preprocesado → features → clasificación → chatbot`  
+
+y sirve como base para iteraciones futuras con mayor capacidad computacional y datasets más completos.
